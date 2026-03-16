@@ -1,275 +1,853 @@
-cat << 'HTMLEOF' > /mnt/user-data/outputs/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FitCheck — AR Try On</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FitCheck — Virtual Try-On</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f9f9f7; color: #1a1a1a; max-width: 480px; margin: 0 auto; min-height: 100vh; }
-nav { background: #fff; border-bottom: 1px solid #eee; padding: 0 1.2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
-.nav-back { font-size: 22px; color: #555; cursor: pointer; background: none; border: none; }
-.nav-title { font-size: 15px; font-weight: 600; }
-.nav-icons { display: flex; gap: 16px; font-size: 20px; color: #555; }
+:root {
+  --black: #0a0a0a;
+  --white: #fafaf8;
+  --gray-100: #f4f4f2;
+  --gray-200: #e8e8e4;
+  --gray-400: #9a9a96;
+  --gray-600: #5a5a56;
+  --accent: #1a1a1a;
+  --blue: #0057ff;
+  --blue-light: #e8f0ff;
+  --green: #00a651;
+  --red: #e03131;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--white);
+  color: var(--black);
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-/* PRODUCT HEADER */
-.product-header { background: #fff; padding: 1rem 1.2rem 0.5rem; }
-.product-img-main { width: 100%; aspect-ratio: 4/3; background: #f5f5f3; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; position: relative; }
-.product-img-main img { width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; }
+/* NAV */
+.nav {
+  background: rgba(250,250,248,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.nav-back { background: none; border: none; font-size: 20px; color: var(--gray-600); cursor: pointer; padding: 4px; }
+.nav-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
+.nav-brand span { color: var(--blue); }
+.nav-right { display: flex; gap: 14px; align-items: center; }
+.nav-icon { background: none; border: none; font-size: 18px; color: var(--gray-600); cursor: pointer; }
+.nav-cart-badge { position: relative; }
+.nav-cart-badge::after { content: '2'; position: absolute; top: -4px; right: -6px; background: var(--blue); color: #fff; font-size: 9px; font-weight: 700; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-/* VIEW TABS */
-.view-tabs { display: flex; gap: 8px; margin-bottom: 1rem; }
-.view-tab { flex: 1; padding: 10px 6px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; background: #fff; color: #555; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.15s; }
-.view-tab svg { width: 20px; height: 20px; }
-.view-tab.active { border-color: #1a5fb4; color: #1a5fb4; background: #f0f5ff; }
-.view-tab.ar-tab { background: #1a5fb4; border-color: #1a5fb4; color: #fff; }
-.view-tab.ar-tab.active { background: #1450a0; }
+/* PRODUCT IMAGE AREA */
+.product-media { background: var(--gray-100); position: relative; overflow: hidden; }
+.media-container { position: relative; width: 100%; aspect-ratio: 1/1; overflow: hidden; }
 
-/* PRODUCT INFO */
-.product-info-section { background: #fff; padding: 1rem 1.2rem; border-top: 8px solid #f5f5f3; }
-.product-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.stars { color: #f5a623; font-size: 13px; }
-.rating-count { font-size: 12px; color: #888; }
-.product-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-.product-price { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
-.product-offer { font-size: 12px; color: #1e7e34; font-weight: 500; }
-.size-section { margin-top: 1rem; }
-.size-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 8px; }
-.size-row { display: flex; gap: 8px; }
-.size-btn { border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; background: #fff; }
-.size-btn.active { border-color: #1a5fb4; color: #1a5fb4; font-weight: 600; background: #f0f5ff; }
-.add-cart-btn { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1.2rem; }
-.add-cart-btn:hover { background: #333; }
-
-/* CATALOGUE */
-.catalogue-section { background: #fff; padding: 1rem 1.2rem; border-top: 8px solid #f5f5f3; }
-.cat-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 10px; }
-.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.cat-item { border: 1.5px solid #eee; border-radius: 10px; overflow: hidden; cursor: pointer; background: #fff; transition: all 0.15s; }
-.cat-item:hover { border-color: #aaa; }
-.cat-item.active { border-color: #1a5fb4; }
-.cat-item-img { width: 100%; aspect-ratio: 4/3; background: #f9f9f7; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.cat-item-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-.cat-item-info { padding: 6px 8px; }
-.cat-item-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cat-item-price { font-size: 11px; color: #888; }
-
-/* AR MODAL */
-.ar-modal { position: fixed; inset: 0; background: #000; z-index: 300; display: none; flex-direction: column; max-width: 480px; margin: 0 auto; }
-.ar-modal.open { display: flex; }
-.ar-top { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
-.ar-close { background: rgba(0,0,0,0.5); color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.ar-item-name { font-size: 13px; font-weight: 600; color: #fff; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 100px; }
-.ar-badge { font-size: 11px; font-weight: 600; color: #fff; background: rgba(26,95,180,0.9); padding: 4px 10px; border-radius: 100px; }
-.ar-cam-wrap { position: relative; flex: 1; overflow: hidden; }
-#ar-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
-#ar-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.ar-status { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: #fff; font-size: 12px; padding: 6px 16px; border-radius: 100px; white-space: nowrap; }
-.ar-status.green { background: rgba(30,126,52,0.85); }
-.ar-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(transparent, rgba(0,0,0,0.7)); }
-.ar-thumb-row { display: flex; gap: 8px; overflow-x: auto; }
-.ar-thumb { width: 54px; height: 54px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); overflow: hidden; cursor: pointer; flex-shrink: 0; background: #fff; }
-.ar-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
-.ar-thumb.active { border-color: #1a5fb4; }
-.ar-snap-btn { width: 54px; height: 54px; border-radius: 50%; background: #fff; border: 3px solid rgba(255,255,255,0.5); cursor: pointer; flex-shrink: 0; }
+/* PHOTOS SWIPER */
+.photos-swiper { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.photos-swiper::-webkit-scrollbar { display: none; }
+.photo-slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; background: var(--gray-100); }
+.photo-slide img { width: 100%; height: 100%; object-fit: cover; }
 
 /* 360 VIEW */
-.view-360-wrap { width: 100%; aspect-ratio: 4/3; background: #f0f0f0; border-radius: 12px; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
-.view-360-wrap.show { display: flex; }
-.view-360-inner { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.rotating-product { animation: spin360 4s linear infinite; }
-@keyframes spin360 { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-.view-360-label { font-size: 12px; color: #888; position: absolute; bottom: 12px; }
+.view-360 { display: none; width: 100%; height: 100%; position: relative; overflow: hidden; align-items: center; justify-content: center; background: var(--gray-100); cursor: grab; user-select: none; }
+.view-360.active { display: flex; }
+.view-360:active { cursor: grabbing; }
+.view-360-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: none; }
+.view-360-hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; font-weight: 500; padding: 5px 14px; border-radius: 100px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.view-360-hint svg { width: 14px; height: 14px; }
+.rotate-arrows { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; pointer-events: none; }
+.rotate-arrow { width: 36px; height: 36px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; pointer-events: all; cursor: pointer; border: none; transition: transform 0.1s; }
+.rotate-arrow:active { transform: scale(0.9); }
+.degrees-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; }
+
+/* DOTS */
+.media-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 5; }
+.media-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.25); transition: all 0.2s; }
+.media-dot.active { background: var(--black); width: 16px; border-radius: 3px; }
+
+/* VIEW TABS */
+.view-tabs {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 1rem;
+}
+.view-tab {
+  flex: 1;
+  padding: 12px 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  color: var(--gray-400);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.01em;
+}
+.view-tab svg { width: 18px; height: 18px; }
+.view-tab.active { color: var(--black); border-bottom-color: var(--black); }
+.view-tab.ar { color: #fff; background: var(--blue); border-radius: var(--radius-sm) var(--radius-sm) 0 0; margin-top: 4px; padding-top: 8px; }
+.view-tab.ar.active { background: #0040cc; border-bottom-color: transparent; }
+
+/* COLOUR SWATCHES */
+.colour-row { display: flex; gap: 8px; align-items: center; margin: 12px 0 4px; }
+.colour-swatch { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; flex-shrink: 0; }
+.colour-swatch.active { border-color: var(--black); transform: scale(1.15); }
+.colour-label { font-size: 12px; color: var(--gray-600); margin-left: 4px; }
+
+/* PRODUCT INFO */
+.product-info { padding: 1rem 1.1rem 0.5rem; background: #fff; }
+.brand-name { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 4px; }
+.product-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; line-height: 1.2; margin-bottom: 6px; }
+.rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.stars-filled { color: #f5a623; font-size: 12px; letter-spacing: 1px; }
+.rating-num { font-size: 13px; font-weight: 500; }
+.rating-count { font-size: 12px; color: var(--gray-400); }
+.rating-divider { width: 1px; height: 12px; background: var(--gray-200); }
+.reviews-link { font-size: 12px; color: var(--blue); cursor: pointer; }
+.price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.price-main { font-size: 26px; font-weight: 500; }
+.price-old { font-size: 15px; color: var(--gray-400); text-decoration: line-through; }
+.price-off { font-size: 13px; font-weight: 600; color: var(--green); background: #e6f9f0; padding: 2px 8px; border-radius: 100px; }
+.offer-tag { font-size: 12px; color: var(--green); font-weight: 500; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+
+/* SIZE */
+.section-block { padding: 14px 1.1rem; background: #fff; border-top: 6px solid var(--gray-100); }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.section-title { font-size: 13px; font-weight: 500; }
+.size-guide { font-size: 12px; color: var(--blue); cursor: pointer; }
+.size-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.size-btn {
+  min-width: 48px;
+  height: 40px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  transition: all 0.15s;
+  color: var(--black);
+}
+.size-btn:hover { border-color: var(--black); }
+.size-btn.active { border-color: var(--black); background: var(--black); color: #fff; }
+.size-btn.oos { color: var(--gray-400); text-decoration: line-through; cursor: not-allowed; }
+
+/* COLOUR SECTION */
+.colour-section { padding: 14px 1.1rem; background: #fff; border-top: 1px solid var(--gray-100); }
+
+/* FEATURES */
+.features { padding: 14px 1.1rem; background: #fff; border-top: 6px solid var(--gray-100); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.feature { display: flex; align-items: flex-start; gap: 8px; }
+.feature-icon { width: 32px; height: 32px; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.feature-text { font-size: 11px; color: var(--gray-600); line-height: 1.4; }
+.feature-text strong { display: block; color: var(--black); font-weight: 500; font-size: 12px; }
+
+/* RELATED */
+.related { padding: 14px 1.1rem 1.5rem; background: #fff; border-top: 6px solid var(--gray-100); }
+.related-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.related-scroll::-webkit-scrollbar { display: none; }
+.related-card { flex: 0 0 130px; cursor: pointer; border-radius: var(--radius-sm); overflow: hidden; border: 1.5px solid var(--gray-200); background: #fff; transition: all 0.15s; }
+.related-card:hover { border-color: var(--black); }
+.related-card.active { border-color: var(--blue); }
+.related-card-img { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: var(--gray-100); }
+.related-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.related-card-info { padding: 8px 9px; }
+.related-card-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.related-card-price { font-size: 11px; color: var(--gray-600); }
+
+/* BOTTOM BAR */
+.bottom-bar {
+  position: sticky;
+  bottom: 0;
+  background: rgba(250,250,248,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--gray-200);
+  padding: 12px 1.1rem;
+  display: flex;
+  gap: 10px;
+  z-index: 50;
+}
+.btn-wishlist { width: 48px; height: 48px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); background: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.btn-wishlist:hover { border-color: var(--red); color: var(--red); }
+.btn-cart { flex: 1; height: 48px; background: var(--black); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; letter-spacing: 0.02em; transition: all 0.15s; }
+.btn-cart:hover { background: #333; }
+.btn-ar { width: 48px; height: 48px; background: var(--blue); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.btn-ar:hover { background: #0040cc; }
+
+/* =================== AR FULLSCREEN =================== */
+.ar-screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+}
+.ar-screen.open { display: flex; }
+
+/* AR video layer */
+.ar-cam { position: relative; flex: 1; overflow: hidden; }
+#ar-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+#ar-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* AR top bar */
+.ar-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+  z-index: 10;
+}
+.ar-close-btn {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ar-title-pill {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 100px;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ar-fitcheck-badge {
+  background: var(--blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+}
+
+/* AR status pill */
+.ar-status-pill {
+  position: absolute;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 18px;
+  border-radius: 100px;
+  white-space: nowrap;
+  z-index: 10;
+  transition: background 0.3s;
+}
+.ar-status-pill.tracked { background: rgba(0,166,81,0.85); }
+.ar-status-pill.error { background: rgba(224,49,49,0.85); }
+
+/* AR body guide outline */
+.ar-body-guide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.35;
+}
+.ar-body-guide.hidden { opacity: 0; transition: opacity 0.5s; }
+
+/* AR scan animation */
+.ar-scan-line {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--blue), transparent);
+  animation: scanLine 2s ease-in-out infinite;
+  z-index: 6;
+  top: 20%;
+}
+@keyframes scanLine {
+  0% { top: 20%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 80%; opacity: 0; }
+}
+.ar-scan-line.hidden { display: none; }
+.ar-corner { position: absolute; width: 40px; height: 40px; border-color: rgba(255,255,255,0.6); border-style: solid; z-index: 6; }
+.ar-corner.tl { top: 15%; left: 15%; border-width: 2px 0 0 2px; }
+.ar-corner.tr { top: 15%; right: 15%; border-width: 2px 2px 0 0; }
+.ar-corner.bl { bottom: 20%; left: 15%; border-width: 0 0 2px 2px; }
+.ar-corner.br { bottom: 20%; right: 15%; border-width: 0 2px 2px 0; }
+
+/* AR bottom controls */
+.ar-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 16px 16px 28px;
+  background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+  z-index: 10;
+}
+.ar-items-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: none;
+  align-items: center;
+}
+.ar-items-row::-webkit-scrollbar { display: none; }
+.ar-item-thumb {
+  flex: 0 0 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.25);
+  overflow: hidden;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.15s;
+  position: relative;
+}
+.ar-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ar-item-thumb.active { border-color: var(--blue); transform: scale(1.08); }
+.ar-item-thumb .ar-thumb-check {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,87,255,0.3);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+.ar-item-thumb.active .ar-thumb-check { display: flex; }
+
+.ar-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ar-opacity-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-right: 16px; }
+.ar-opacity-label { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: 0.05em; }
+.ar-opacity-slider { width: 100%; height: 3px; accent-color: #fff; cursor: pointer; }
+.ar-snap-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid rgba(255,255,255,0.4);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+  position: relative;
+}
+.ar-snap-btn::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.15);
+}
+.ar-snap-btn:active { transform: scale(0.92); }
+.ar-flip-btn {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(10,10,10,0.9);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 100px;
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<nav>
-  <button class="nav-back">&#8592;</button>
-  <div class="nav-title">Men's Clothing</div>
-  <div class="nav-icons">
-    <span>&#9825;</span>
-    <span>&#128722;</span>
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-back">←</button>
+  <div class="nav-brand">Fit<span>Check</span></div>
+  <div class="nav-right">
+    <button class="nav-icon">🔍</button>
+    <button class="nav-icon nav-cart-badge">🛒</button>
   </div>
 </nav>
 
-<!-- PRODUCT PAGE -->
-<div id="product-page">
-  <!-- Main image / 360 / AR selector -->
-  <div class="product-header">
-    <!-- Photos view -->
-    <div id="photos-view">
-      <div class="product-img-main">
-        <img id="main-product-img" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80" alt="Product"/>
-      </div>
+<!-- PRODUCT MEDIA -->
+<div class="product-media">
+  <div class="media-container" id="media-container">
+
+    <!-- Photos swiper -->
+    <div class="photos-swiper" id="photos-swiper">
+      <div class="photo-slide"><img id="slide-1" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
+      <div class="photo-slide"><img id="slide-2" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
+      <div class="photo-slide"><img id="slide-3" src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90" alt=""/></div>
     </div>
 
     <!-- 360 view -->
-    <div class="view-360-wrap" id="view-360">
-      <div class="view-360-inner">
-        <img class="rotating-product" id="img-360" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80" style="width:220px;height:220px;object-fit:contain;border-radius:8px;" alt="360"/>
-        <div class="view-360-label">Drag to rotate &nbsp;&#8635;</div>
+    <div class="view-360" id="view-360">
+      <img class="view-360-img" id="img-360" src="" alt="360"/>
+      <div class="rotate-arrows">
+        <button class="rotate-arrow" id="rot-left">‹</button>
+        <button class="rotate-arrow" id="rot-right">›</button>
+      </div>
+      <div class="degrees-badge" id="deg-badge">0°</div>
+      <div class="view-360-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9"/><path d="M15 9l-3-3-3 3"/></svg>
+        Drag to rotate 360°
       </div>
     </div>
 
-    <!-- View tabs -->
-    <div class="view-tabs">
-      <div class="view-tab active" id="tab-photos" onclick="switchView('photos')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        Photos
-      </div>
-      <div class="view-tab" id="tab-360" onclick="switchView('360')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        360° view
-      </div>
-      <div class="view-tab ar-tab" id="tab-ar" onclick="openAR()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        AR Try On
-      </div>
+    <div class="media-dots" id="media-dots">
+      <div class="media-dot active"></div>
+      <div class="media-dot"></div>
+      <div class="media-dot"></div>
     </div>
   </div>
 
-  <!-- Product info -->
-  <div class="product-info-section">
-    <div class="product-rating">
-      <span class="stars">★★★★★</span>
-      <span class="rating-count" id="prod-rating">4.7 (2,306)</span>
+  <!-- View tabs -->
+  <div class="view-tabs">
+    <div class="view-tab active" id="tab-photos" onclick="switchView('photos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Photos
     </div>
-    <div class="product-name" id="prod-name">Black Premium Hoodie</div>
-    <div class="product-price" id="prod-price">$59.99</div>
-    <div class="product-offer">Buy 1 Get 1 Free &nbsp;•&nbsp; Free shipping</div>
-    <div class="size-section">
-      <div class="size-label">Size</div>
-      <div class="size-row">
-        <div class="size-btn" onclick="pickSize(this)">XS</div>
-        <div class="size-btn active" onclick="pickSize(this)">S</div>
-        <div class="size-btn" onclick="pickSize(this)">M</div>
-        <div class="size-btn" onclick="pickSize(this)">L</div>
-        <div class="size-btn" onclick="pickSize(this)">XL</div>
-      </div>
+    <div class="view-tab" id="tab-360" onclick="switchView('360')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3c-2.33 3.12-3.5 5.88-3.5 9s1.17 5.88 3.5 9M12 3c2.33 3.12 3.5 5.88 3.5 9s-1.17 5.88-3.5 9"/></svg>
+      360° View
     </div>
-    <button class="add-cart-btn">Add to Cart</button>
-  </div>
-
-  <!-- Catalogue -->
-  <div class="catalogue-section">
-    <div class="cat-title">More items — tap to switch</div>
-    <div class="cat-grid" id="cat-grid"></div>
+    <div class="view-tab ar" id="tab-ar" onclick="openAR()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      AR Try On
+    </div>
   </div>
 </div>
 
-<!-- AR MODAL -->
-<div class="ar-modal" id="ar-modal">
-  <div class="ar-top">
-    <button class="ar-close" onclick="closeAR()">&#10005;</button>
-    <div class="ar-item-name" id="ar-item-label">Black Hoodie</div>
-    <div class="ar-badge">FitCheck AR</div>
+<!-- PRODUCT INFO -->
+<div class="product-info">
+  <div class="brand-name">FitCheck Collection</div>
+  <div class="product-title" id="prod-title">Black Premium Hoodie</div>
+  <div class="rating-row">
+    <span class="stars-filled">★★★★★</span>
+    <span class="rating-num">4.8</span>
+    <div class="rating-divider"></div>
+    <span class="rating-count">2,847 reviews</span>
+    <div class="rating-divider"></div>
+    <span class="reviews-link">View all</span>
   </div>
-  <div class="ar-cam-wrap">
+  <div class="price-row">
+    <span class="price-main" id="prod-price">$59.99</span>
+    <span class="price-old">$89.99</span>
+    <span class="price-off">33% OFF</span>
+  </div>
+  <div class="offer-tag">✦ Buy 1 Get 1 Free &nbsp;·&nbsp; Free delivery over $50</div>
+</div>
+
+<!-- COLOUR -->
+<div class="colour-section section-block">
+  <div class="section-head">
+    <div class="section-title">Colour — <span id="colour-label" style="color:var(--gray-600);font-weight:400;">Jet Black</span></div>
+  </div>
+  <div class="colour-row" id="colour-row"></div>
+</div>
+
+<!-- SIZE -->
+<div class="section-block">
+  <div class="section-head">
+    <div class="section-title">Size</div>
+    <div class="size-guide">Size guide →</div>
+  </div>
+  <div class="size-grid">
+    <div class="size-btn oos" title="Out of stock">XS</div>
+    <div class="size-btn" onclick="pickSize(this)">S</div>
+    <div class="size-btn active" onclick="pickSize(this)">M</div>
+    <div class="size-btn" onclick="pickSize(this)">L</div>
+    <div class="size-btn" onclick="pickSize(this)">XL</div>
+    <div class="size-btn" onclick="pickSize(this)">XXL</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features">
+  <div class="feature"><div class="feature-icon">🚚</div><div class="feature-text"><strong>Free Delivery</strong>Orders over $50</div></div>
+  <div class="feature"><div class="feature-icon">↩️</div><div class="feature-text"><strong>30-Day Returns</strong>Easy returns</div></div>
+  <div class="feature"><div class="feature-icon">✦</div><div class="feature-text"><strong>Premium Quality</strong>100% Cotton</div></div>
+  <div class="feature"><div class="feature-icon">🔒</div><div class="feature-text"><strong>Secure Pay</strong>256-bit SSL</div></div>
+</div>
+
+<!-- RELATED -->
+<div class="related">
+  <div class="section-head" style="margin-bottom:10px;">
+    <div class="section-title">More items to try on</div>
+    <div style="font-size:12px;color:var(--blue);cursor:pointer;">See all →</div>
+  </div>
+  <div class="related-scroll" id="related-scroll"></div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="btn-wishlist" onclick="toggleWishlist(this)">♡</button>
+  <button class="btn-cart" onclick="showToast('Added to cart!')">Add to Cart</button>
+  <button class="btn-ar" onclick="openAR()" title="AR Try On">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+  </button>
+</div>
+
+<!-- =================== AR FULLSCREEN =================== -->
+<div class="ar-screen" id="ar-screen">
+  <div class="ar-cam" id="ar-cam">
     <video id="ar-video" autoplay playsinline muted></video>
     <canvas id="ar-canvas"></canvas>
-    <div class="ar-status" id="ar-status">Starting camera...</div>
-  </div>
-  <div class="ar-bottom">
-    <div class="ar-thumb-row" id="ar-thumb-row"></div>
-    <button class="ar-snap-btn" onclick="snapPhoto()" title="Take photo"></button>
+
+    <!-- scanning corners -->
+    <div class="ar-corner tl"></div>
+    <div class="ar-corner tr"></div>
+    <div class="ar-corner bl"></div>
+    <div class="ar-corner br"></div>
+
+    <!-- scan line -->
+    <div class="ar-scan-line" id="ar-scan-line"></div>
+
+    <!-- body guide -->
+    <div class="ar-body-guide" id="ar-body-guide">
+      <svg width="120" height="240" viewBox="0 0 120 240" fill="none" stroke="white" stroke-width="1.5" opacity="0.6">
+        <ellipse cx="60" cy="28" rx="22" ry="26"/>
+        <line x1="60" y1="54" x2="60" y2="140"/>
+        <line x1="60" y1="75" x2="18" y2="120"/>
+        <line x1="60" y1="75" x2="102" y2="120"/>
+        <line x1="60" y1="140" x2="36" y2="220"/>
+        <line x1="60" y1="140" x2="84" y2="220"/>
+      </svg>
+    </div>
+
+    <!-- status -->
+    <div class="ar-status-pill" id="ar-status">Starting camera...</div>
+
+    <!-- top bar -->
+    <div class="ar-topbar">
+      <button class="ar-close-btn" onclick="closeAR()">✕</button>
+      <div class="ar-title-pill" id="ar-item-label">Black Hoodie</div>
+      <div class="ar-fitcheck-badge">FITCHECK AR</div>
+    </div>
+
+    <!-- bottom -->
+    <div class="ar-bottom">
+      <div class="ar-items-row" id="ar-items-row"></div>
+      <div class="ar-controls-row">
+        <div class="ar-opacity-wrap">
+          <div class="ar-opacity-label">OPACITY</div>
+          <input type="range" class="ar-opacity-slider" id="ar-opacity" min="40" max="100" value="90" step="5"/>
+        </div>
+        <button class="ar-flip-btn" onclick="flipCamera()" title="Flip camera">⟳</button>
+        <button class="ar-snap-btn" onclick="snapPhoto()" title="Capture"></button>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script>
-const catalogue = [
-  { id:1, name:'Black Hoodie', price:'$59.99', url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80', color:'#222222' },
-  { id:2, name:'White Tee', price:'$29.99', url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80', color:'#eeeeee' },
-  { id:3, name:'Denim Jacket', price:'$89.99', url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=600&q=80', color:'#4A6A9A' },
-  { id:4, name:'Trench Coat', price:'$129.99', url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600&q=80', color:'#C4A882' },
-  { id:5, name:'Grey Sweatshirt', price:'$49.99', url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80', color:'#888888' },
-  { id:6, name:'Navy Polo', price:'$39.99', url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=600&q=80', color:'#1a3a6a' },
+
+// ===================== DATA =====================
+const items = [
+  { id:1, name:'Black Premium Hoodie', price:'$59.99', url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90', color:'#1a1a1a', colourName:'Jet Black' },
+  { id:2, name:'White Essential Tee', price:'$29.99', url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90', color:'#f0f0ee', colourName:'Pure White' },
+  { id:3, name:'Indigo Denim Jacket', price:'$89.99', url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90', color:'#3a5a8a', colourName:'Indigo Blue' },
+  { id:4, name:'Camel Trench Coat', price:'$129.99', url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90', color:'#c4a57a', colourName:'Camel' },
+  { id:5, name:'Ash Grey Sweatshirt', price:'$49.99', url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90', color:'#8a8a86', colourName:'Ash Grey' },
+  { id:6, name:'Navy Classic Polo', price:'$39.99', url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90', color:'#1a2f5a', colourName:'Navy' },
 ];
 
-let selectedItem = catalogue[0];
+// 360 frames: rotate hue of the same image to simulate angle change
+const frame360Urls = [0,1,2,3,4,5,6,7].map(i =>
+  `https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80&sat=${i*10}`
+);
+
+let selectedItem = items[0];
+let currentView = 'photos';
+let arOpacity = 0.9;
 let mpCamera = null;
-let poseActive = false;
+let facingMode = 'user';
+let scanComplete = false;
 const imgCache = {};
 
-function renderCatalogue() {
-  const grid = document.getElementById('cat-grid');
-  const arRow = document.getElementById('ar-thumb-row');
-  grid.innerHTML = ''; arRow.innerHTML = '';
-  catalogue.forEach(item => {
-    // main catalogue
+// ===================== INIT =====================
+function init() {
+  renderRelated();
+  renderARItems();
+  renderColours();
+  initPhotoSwiper();
+  init360();
+}
+
+// ===================== RELATED =====================
+function renderRelated() {
+  const row = document.getElementById('related-scroll');
+  row.innerHTML = '';
+  items.forEach(item => {
     const el = document.createElement('div');
-    el.className = 'cat-item' + (selectedItem.id === item.id ? ' active' : '');
-    el.onclick = () => switchItem(item);
-    el.innerHTML = `<div class="cat-item-img"><img src="${item.url}" alt="${item.name}" onerror="this.style.display='none'"/></div><div class="cat-item-info"><div class="cat-item-name">${item.name}</div><div class="cat-item-price">${item.price}</div></div>`;
-    grid.appendChild(el);
-    // AR thumbnails
-    const th = document.createElement('div');
-    th.className = 'ar-thumb' + (selectedItem.id === item.id ? ' active' : '');
-    th.onclick = () => switchItem(item);
-    th.innerHTML = `<img src="${item.url}" alt="${item.name}"/>`;
-    arRow.appendChild(th);
+    el.className = 'related-card' + (item.id === selectedItem.id ? ' active' : '');
+    el.onclick = () => selectItem(item);
+    el.innerHTML = `<div class="related-card-img"><img src="${item.url}" alt="${item.name}" loading="lazy" onerror="this.parentNode.style.background='#eee'"/></div><div class="related-card-info"><div class="related-card-name">${item.name}</div><div class="related-card-price">${item.price}</div></div>`;
+    row.appendChild(el);
   });
 }
 
-function switchItem(item) {
+function renderARItems() {
+  const row = document.getElementById('ar-items-row');
+  row.innerHTML = '';
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'ar-item-thumb' + (item.id === selectedItem.id ? ' active' : '');
+    el.onclick = () => selectItem(item);
+    el.innerHTML = `<img src="${item.url}" alt="${item.name}" loading="lazy"/><div class="ar-thumb-check">✓</div>`;
+    row.appendChild(el);
+  });
+}
+
+function renderColours() {
+  const row = document.getElementById('colour-row');
+  row.innerHTML = '';
+  items.forEach((item, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'colour-swatch' + (item.id === selectedItem.id ? ' active' : '');
+    sw.style.background = item.color;
+    sw.style.border = item.color === '#f0f0ee' ? '2px solid #ddd' : '2px solid transparent';
+    sw.onclick = () => selectItem(item);
+    row.appendChild(sw);
+  });
+  document.getElementById('colour-label').textContent = selectedItem.colourName;
+}
+
+function selectItem(item) {
   selectedItem = item;
-  document.getElementById('main-product-img').src = item.url;
-  document.getElementById('img-360').src = item.url;
-  document.getElementById('prod-name').textContent = item.name;
+  document.getElementById('prod-title').textContent = item.name;
   document.getElementById('prod-price').textContent = item.price;
   document.getElementById('ar-item-label').textContent = item.name;
-  renderCatalogue();
+  // update photos
+  document.querySelectorAll('.photo-slide img').forEach(img => img.src = item.url);
+  document.getElementById('img-360').src = item.url;
+  renderRelated();
+  renderARItems();
+  renderColours();
+  preloadImg(item.url);
 }
 
+function preloadImg(url) {
+  if (!imgCache[url]) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = url;
+    imgCache[url] = img;
+  }
+}
+
+// ===================== PHOTO SWIPER =====================
+function initPhotoSwiper() {
+  const swiper = document.getElementById('photos-swiper');
+  const dots = document.querySelectorAll('.media-dot');
+  swiper.addEventListener('scroll', () => {
+    const idx = Math.round(swiper.scrollLeft / swiper.offsetWidth);
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  }, { passive: true });
+}
+
+// ===================== 360 VIEW =====================
+let angle360 = 0;
+let isDragging = false;
+let drag360StartX = 0;
+let drag360StartAngle = 0;
+let autoRotate360 = null;
+
+function init360() {
+  const el = document.getElementById('view-360');
+  el.addEventListener('mousedown', e => { isDragging = true; drag360StartX = e.clientX; drag360StartAngle = angle360; clearInterval(autoRotate360); });
+  el.addEventListener('touchstart', e => { isDragging = true; drag360StartX = e.touches[0].clientX; drag360StartAngle = angle360; clearInterval(autoRotate360); }, { passive: true });
+  window.addEventListener('mousemove', e => { if (!isDragging) return; rotate360By(e.clientX - drag360StartX); });
+  window.addEventListener('touchmove', e => { if (!isDragging) return; rotate360By(e.touches[0].clientX - drag360StartX); }, { passive: true });
+  window.addEventListener('mouseup', () => { isDragging = false; start360Auto(); });
+  window.addEventListener('touchend', () => { isDragging = false; start360Auto(); });
+  document.getElementById('rot-left').onclick = () => { angle360 = (angle360 - 30 + 360) % 360; update360(); };
+  document.getElementById('rot-right').onclick = () => { angle360 = (angle360 + 30) % 360; update360(); };
+}
+
+function rotate360By(dx) {
+  angle360 = (drag360StartAngle + dx * 0.6 + 360) % 360;
+  update360();
+}
+
+function update360() {
+  // Simulate 360 by applying CSS filter hue-rotate and slight scale variation
+  const img = document.getElementById('img-360');
+  const normalised = angle360 / 360;
+  // Slight brightness variation simulates 3D lighting
+  const brightness = 0.85 + 0.3 * Math.abs(Math.cos(normalised * Math.PI * 2));
+  const scaleX = 0.97 + 0.06 * Math.abs(Math.cos(normalised * Math.PI));
+  img.style.filter = `brightness(${brightness.toFixed(2)})`;
+  img.style.transform = `scaleX(${scaleX.toFixed(3)})`;
+  document.getElementById('deg-badge').textContent = Math.round(angle360) + '°';
+}
+
+function start360Auto() {
+  clearInterval(autoRotate360);
+  autoRotate360 = setInterval(() => {
+    angle360 = (angle360 + 0.5) % 360;
+    update360();
+  }, 30);
+}
+
+// ===================== VIEW SWITCHER =====================
 function switchView(view) {
-  document.getElementById('photos-view').style.display = view === 'photos' ? 'block' : 'none';
-  document.getElementById('view-360').style.display = view === '360' ? 'flex' : 'none';
+  currentView = view;
+  const swiper = document.getElementById('photos-swiper');
+  const v360 = document.getElementById('view-360');
+  const dots = document.getElementById('media-dots');
+  swiper.style.display = view === 'photos' ? 'flex' : 'none';
+  v360.classList.toggle('active', view === '360');
+  dots.style.display = view === 'photos' ? 'flex' : 'none';
   document.getElementById('tab-photos').classList.toggle('active', view === 'photos');
   document.getElementById('tab-360').classList.toggle('active', view === '360');
+  if (view === '360') {
+    document.getElementById('img-360').src = selectedItem.url;
+    start360Auto();
+  } else {
+    clearInterval(autoRotate360);
+  }
 }
 
+// ===================== SIZE / WISHLIST =====================
 function pickSize(el) {
-  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.size-btn:not(.oos)').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
 }
 
-// AR
+function toggleWishlist(btn) {
+  const active = btn.textContent === '♥';
+  btn.textContent = active ? '♡' : '♥';
+  btn.style.color = active ? '' : 'var(--red)';
+  btn.style.borderColor = active ? '' : 'var(--red)';
+  showToast(active ? 'Removed from wishlist' : 'Added to wishlist ♥');
+}
+
+// ===================== AR =====================
 function openAR() {
-  document.getElementById('ar-modal').classList.add('open');
-  document.getElementById('ar-item-label').textContent = selectedItem.name;
+  document.getElementById('ar-screen').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setARStatus('Starting camera...');
   startARCamera();
+  preloadImg(selectedItem.url);
 }
 
 function closeAR() {
-  document.getElementById('ar-modal').classList.remove('open');
+  document.getElementById('ar-screen').classList.remove('open');
+  document.body.style.overflow = '';
+  scanComplete = false;
   if (mpCamera) { try { mpCamera.stop(); } catch(e){} mpCamera = null; }
   const video = document.getElementById('ar-video');
   if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; }
+  const ctx = document.getElementById('ar-canvas').getContext('2d');
+  ctx.clearRect(0, 0, 9999, 9999);
 }
 
-function setARStatus(msg, green) {
-  const s = document.getElementById('ar-status');
-  s.textContent = msg;
-  s.className = 'ar-status' + (green ? ' green' : '');
+function setARStatus(msg, type) {
+  const el = document.getElementById('ar-status');
+  el.textContent = msg;
+  el.className = 'ar-status-pill' + (type ? ' ' + type : '');
 }
 
 function startARCamera() {
-  setARStatus('Starting camera...');
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false })
-    .then(stream => {
-      const video = document.getElementById('ar-video');
-      video.srcObject = stream;
-      video.onloadedmetadata = () => {
-        setARStatus('Stand back — show your full body');
-        startARPose(video);
-      };
-    })
-    .catch(() => {
-      setARStatus('Camera denied — allow camera access and retry');
-    });
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: false
+  }).then(stream => {
+    const video = document.getElementById('ar-video');
+    video.srcObject = stream;
+    video.onloadedmetadata = () => {
+      setARStatus('Stand back — full body visible');
+      setTimeout(() => {
+        scanComplete = true;
+        document.getElementById('ar-scan-line').classList.add('hidden');
+      }, 2500);
+      startARPose(video);
+    };
+  }).catch(() => {
+    setARStatus('Camera denied — allow access in settings', 'error');
+    document.getElementById('ar-scan-line').classList.add('hidden');
+  });
+}
+
+function flipCamera() {
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+  closeAR();
+  setTimeout(openAR, 300);
 }
 
 function startARPose(video) {
@@ -287,18 +865,20 @@ function startARPose(video) {
     ctx.scale(-1, 1);
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-    if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+    if (results.poseLandmarks && results.poseLandmarks.length > 0 && scanComplete) {
+      document.getElementById('ar-body-guide').classList.add('hidden');
       drawClothingAR(ctx, canvas.width, canvas.height, results.poseLandmarks);
-      setARStatus('Body tracked — ' + selectedItem.name, true);
-    } else {
-      setARStatus('Show your full upper body to the camera');
+      setARStatus('✓ ' + selectedItem.name, 'tracked');
+    } else if (scanComplete) {
+      document.getElementById('ar-body-guide').classList.remove('hidden');
+      setARStatus('Move back — show full upper body');
     }
     ctx.restore();
   });
 
   mpCamera = new Camera(video, {
-    onFrame: async () => { await pose.send({ image: video }); },
-    width: 640, height: 480
+    onFrame: async () => { if (mpCamera) await pose.send({ image: video }); },
+    width: 1280, height: 720
   });
   mpCamera.start();
 }
@@ -317,31 +897,32 @@ function drawClothingAR(ctx, w, h, lm) {
   const lS = lm[11], rS = lm[12], lH = lm[23], rH = lm[24];
   if (!lS || !rS || !lH || !rH) return;
 
+  arOpacity = document.getElementById('ar-opacity').value / 100;
+
   const lsx = (1 - lS.x) * w, lsy = lS.y * h;
   const rsx = (1 - rS.x) * w, rsy = rS.y * h;
-  const lhy = lH.y * h, rhy = rH.y * h;
+  const avgShoulderY = (lsy + rsy) / 2;
+  const avgHipY = (lH.y * h + rH.y * h) / 2;
 
   const shoulderW = Math.abs(rsx - lsx);
-  const torsoH = ((lhy + rhy) / 2) - ((lsy + rsy) / 2);
+  const torsoH = avgHipY - avgShoulderY;
   const cx = (lsx + rsx) / 2;
-  const topY = ((lsy + rsy) / 2) - torsoH * 0.15;
 
-  const drawW = shoulderW * 1.75;
-  const drawH = torsoH * 1.55;
+  const drawW = shoulderW * 1.8;
+  const drawH = torsoH * 1.6;
   const drawX = cx - drawW / 2;
-  const drawY = topY - drawH * 0.04;
+  const drawY = avgShoulderY - drawH * 0.08;
 
   const img = getImg(selectedItem.url);
   if (img.complete && img.naturalWidth > 0) {
-    ctx.globalAlpha = 0.9;
+    ctx.globalAlpha = arOpacity;
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
     ctx.globalAlpha = 1;
   } else {
-    ctx.fillStyle = selectedItem.color || '#4A90D9';
-    ctx.globalAlpha = 0.65;
+    ctx.fillStyle = selectedItem.color;
+    ctx.globalAlpha = 0.6;
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(drawX, drawY, drawW, drawH, 8);
-    else ctx.rect(drawX, drawY, drawW, drawH);
+    ctx.roundRect ? ctx.roundRect(drawX, drawY, drawW, drawH, 10) : ctx.rect(drawX, drawY, drawW, drawH);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
@@ -350,14 +931,23 @@ function drawClothingAR(ctx, w, h, lm) {
 function snapPhoto() {
   const canvas = document.getElementById('ar-canvas');
   const link = document.createElement('a');
-  link.download = 'fitcheck-tryon.png';
-  link.href = canvas.toDataURL();
+  link.download = 'fitcheck-' + selectedItem.name.replace(/\s/g,'-').toLowerCase() + '.png';
+  link.href = canvas.toDataURL('image/png');
   link.click();
+  showToast('Photo saved! 📸');
 }
 
-renderCatalogue();
+// ===================== TOAST =====================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
 </script>
 </body>
 </html>
-HTMLEOF
-echo "Done"
