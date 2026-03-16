@@ -1,953 +1,922 @@
+cat << 'HTMLEOF' > /mnt/user-data/outputs/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>FitCheck — Virtual Try-On</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FitCheck — AI Virtual Try-On</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --black: #0a0a0a;
-  --white: #fafaf8;
-  --gray-100: #f4f4f2;
-  --gray-200: #e8e8e4;
-  --gray-400: #9a9a96;
-  --gray-600: #5a5a56;
-  --accent: #1a1a1a;
-  --blue: #0057ff;
-  --blue-light: #e8f0ff;
-  --green: #00a651;
-  --red: #e03131;
-  --radius: 16px;
-  --radius-sm: 10px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--white);
-  color: var(--black);
-  max-width: 430px;
-  margin: 0 auto;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+:root{--blk:#080808;--wht:#fafaf8;--g1:#f2f2f0;--g2:#e4e4e0;--g4:#989894;--g6:#585854;--blu:#0052ff;--blu2:#003ecc;--grn:#00b060;--red:#e03030}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+.nav{background:rgba(250,250,248,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--g2);padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:60}
+.nav-back{background:none;border:none;font-size:20px;color:var(--g6);cursor:pointer}
+.nav-logo{font-family:'Playfair Display',serif;font-size:21px;font-weight:600}
+.nav-logo span{color:var(--blu)}
+.nav-right{display:flex;gap:10px}
+.nib{background:none;border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:background .15s;position:relative}
+.nib:hover{background:var(--g1)}
+.cdot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--blu);border-radius:50%;border:2px solid var(--wht)}
 
-/* NAV */
-.nav {
-  background: rgba(250,250,248,0.92);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 0 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 54px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.nav-back { background: none; border: none; font-size: 20px; color: var(--gray-600); cursor: pointer; padding: 4px; }
-.nav-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
-.nav-brand span { color: var(--blue); }
-.nav-right { display: flex; gap: 14px; align-items: center; }
-.nav-icon { background: none; border: none; font-size: 18px; color: var(--gray-600); cursor: pointer; }
-.nav-cart-badge { position: relative; }
-.nav-cart-badge::after { content: '2'; position: absolute; top: -4px; right: -6px; background: var(--blue); color: #fff; font-size: 9px; font-weight: 700; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+/* MEDIA */
+.media-wrap{background:var(--g1);position:relative}
+.media-inner{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#1a1a2e}
 
-/* PRODUCT IMAGE AREA */
-.product-media { background: var(--gray-100); position: relative; overflow: hidden; }
-.media-container { position: relative; width: 100%; aspect-ratio: 1/1; overflow: hidden; }
+/* PHOTO SWIPER */
+.swiper{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.swiper::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;height:100%;scroll-snap-align:start;overflow:hidden}
+.slide img{width:100%;height:100%;object-fit:cover;transition:transform .5s;display:block}
+.slide:hover img{transform:scale(1.04)}
 
-/* PHOTOS SWIPER */
-.photos-swiper { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-.photos-swiper::-webkit-scrollbar { display: none; }
-.photo-slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; background: var(--gray-100); }
-.photo-slide img { width: 100%; height: 100%; object-fit: cover; }
+/* 3D VIEWER */
+.viewer3d{display:none;position:absolute;inset:0;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f1a0f 100%)}
+.viewer3d.show{display:block}
+#threeCanvas{width:100%!important;height:100%!important;display:block;touch-action:none}
 
-/* 360 VIEW */
-.view-360 { display: none; width: 100%; height: 100%; position: relative; overflow: hidden; align-items: center; justify-content: center; background: var(--gray-100); cursor: grab; user-select: none; }
-.view-360.active { display: flex; }
-.view-360:active { cursor: grabbing; }
-.view-360-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: none; }
-.view-360-hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; font-weight: 500; padding: 5px 14px; border-radius: 100px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.view-360-hint svg { width: 14px; height: 14px; }
-.rotate-arrows { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; pointer-events: none; }
-.rotate-arrow { width: 36px; height: 36px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; pointer-events: all; cursor: pointer; border: none; transition: transform 0.1s; }
-.rotate-arrow:active { transform: scale(0.9); }
-.degrees-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; }
+/* 3D UI overlays */
+.v3d-ui{position:absolute;inset:0;pointer-events:none;z-index:5}
+.v3d-deg{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:4px 13px;border-radius:100px;letter-spacing:.04em;pointer-events:all}
+.v3d-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:500;padding:6px 16px;border-radius:100px;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .5s}
+.v3d-hint.gone{opacity:0}
+.v3d-hint svg{width:13px;height:13px}
+.v3d-reset{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;cursor:pointer;pointer-events:all;transition:background .15s}
+.v3d-reset:hover{background:rgba(255,255,255,.22)}
+.v3d-zoom{position:absolute;right:12px;bottom:48px;display:flex;flex-direction:column;gap:6px;pointer-events:all}
+.v3d-zbtn{width:34px;height:34px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.v3d-zbtn:hover{background:rgba(255,255,255,.25)}
+.v3d-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,#0f0f1a,#1a1a2e)}
+.v3d-loading.done{display:none}
+.v3d-spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--blu);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.v3d-load-txt{color:rgba(255,255,255,.6);font-size:12px;font-weight:500}
 
 /* DOTS */
-.media-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 5; }
-.media-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.25); transition: all 0.2s; }
-.media-dot.active { background: var(--black); width: 16px; border-radius: 3px; }
+.mdots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;pointer-events:none}
+.mdot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.2);transition:all .25s}
+.mdot.on{background:var(--blk);width:18px;border-radius:3px}
 
-/* VIEW TABS */
-.view-tabs {
-  display: flex;
-  gap: 0;
-  background: #fff;
-  border-bottom: 1px solid var(--gray-200);
-  padding: 0 1rem;
-}
-.view-tab {
-  flex: 1;
-  padding: 12px 4px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-  cursor: pointer;
-  color: var(--gray-400);
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  letter-spacing: 0.01em;
-}
-.view-tab svg { width: 18px; height: 18px; }
-.view-tab.active { color: var(--black); border-bottom-color: var(--black); }
-.view-tab.ar { color: #fff; background: var(--blue); border-radius: var(--radius-sm) var(--radius-sm) 0 0; margin-top: 4px; padding-top: 8px; }
-.view-tab.ar.active { background: #0040cc; border-bottom-color: transparent; }
-
-/* COLOUR SWATCHES */
-.colour-row { display: flex; gap: 8px; align-items: center; margin: 12px 0 4px; }
-.colour-swatch { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; flex-shrink: 0; }
-.colour-swatch.active { border-color: var(--black); transform: scale(1.15); }
-.colour-label { font-size: 12px; color: var(--gray-600); margin-left: 4px; }
+/* TABS */
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--g2);padding:0 .7rem}
+.tab{flex:1;padding:11px 4px 9px;font-size:11.5px;font-weight:500;text-align:center;cursor:pointer;color:var(--g4);border-bottom:2.5px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab svg{width:17px;height:17px}
+.tab.on{color:var(--blk);border-bottom-color:var(--blk)}
+.tab.ar-tab{background:var(--blu);color:#fff;border-radius:10px 10px 0 0;margin-top:5px;padding-top:7px;border-bottom-color:transparent!important}
+.tab.ar-tab:hover{background:var(--blu2)}
 
 /* PRODUCT INFO */
-.product-info { padding: 1rem 1.1rem 0.5rem; background: #fff; }
-.brand-name { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 4px; }
-.product-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; line-height: 1.2; margin-bottom: 6px; }
-.rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.stars-filled { color: #f5a623; font-size: 12px; letter-spacing: 1px; }
-.rating-num { font-size: 13px; font-weight: 500; }
-.rating-count { font-size: 12px; color: var(--gray-400); }
-.rating-divider { width: 1px; height: 12px; background: var(--gray-200); }
-.reviews-link { font-size: 12px; color: var(--blue); cursor: pointer; }
-.price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-.price-main { font-size: 26px; font-weight: 500; }
-.price-old { font-size: 15px; color: var(--gray-400); text-decoration: line-through; }
-.price-off { font-size: 13px; font-weight: 600; color: var(--green); background: #e6f9f0; padding: 2px 8px; border-radius: 100px; }
-.offer-tag { font-size: 12px; color: var(--green); font-weight: 500; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+.pinfo{padding:1rem 1rem .5rem;background:#fff}
+.brand{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--g4);margin-bottom:4px}
+.ptitle{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;line-height:1.18;margin-bottom:8px}
+.stars{color:#f5a623;font-size:12px;letter-spacing:1px}
+.rrow{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.rnum{font-size:13px;font-weight:600}
+.rcnt{font-size:12px;color:var(--g4)}
+.rdiv{width:1px;height:11px;background:var(--g2)}
+.rlink{font-size:12px;color:var(--blu);cursor:pointer}
+.prow{display:flex;align-items:baseline;gap:10px;margin-bottom:5px;flex-wrap:wrap}
+.pmain{font-size:28px;font-weight:600;letter-spacing:-.02em}
+.pold{font-size:15px;color:var(--g4);text-decoration:line-through}
+.poff{font-size:12px;font-weight:700;color:var(--grn);background:#e8faf2;padding:3px 9px;border-radius:100px}
+.orow{font-size:12px;color:var(--grn);font-weight:500;margin-bottom:4px}
+.sec{padding:13px 1rem;background:#fff;border-top:6px solid var(--g1)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.st{font-size:13px;font-weight:500}
+.sl{font-size:12px;color:var(--blu);cursor:pointer}
+.crow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.csw{width:27px;height:27px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .2s;flex-shrink:0;position:relative}
+.csw.on{border-color:var(--blk);transform:scale(1.16)}
+.csw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.sgrid{display:flex;gap:8px;flex-wrap:wrap}
+.sbtn{min-width:50px;height:42px;border:1.5px solid var(--g2);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 14px;transition:all .15s;color:var(--blk);font-family:inherit}
+.sbtn:hover:not(.oos){border-color:var(--blk)}
+.sbtn.on{border-color:var(--blk);background:var(--blk);color:#fff}
+.sbtn.oos{color:var(--g4);text-decoration:line-through;cursor:not-allowed;opacity:.55}
+.feats{padding:13px 1rem;background:#fff;border-top:6px solid var(--g1);display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.feat{display:flex;align-items:flex-start;gap:8px}
+.fic{width:33px;height:33px;background:var(--g1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ftx{font-size:11px;color:var(--g6);line-height:1.45}
+.ftx strong{display:block;color:var(--blk);font-size:12px;font-weight:500;margin-bottom:1px}
+.related{padding:13px 1rem 80px;background:#fff;border-top:6px solid var(--g1)}
+.rscroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.rscroll::-webkit-scrollbar{display:none}
+.rcard{flex:0 0 128px;cursor:pointer;border-radius:12px;overflow:hidden;border:1.5px solid var(--g2);background:#fff;transition:all .18s}
+.rcard:hover{border-color:var(--blk);transform:translateY(-2px)}
+.rcard.on{border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,82,255,.18)}
+.rcimg{width:100%;aspect-ratio:3/4;overflow:hidden;background:var(--g1)}
+.rcimg img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.rcard:hover .rcimg img{transform:scale(1.07)}
+.rcinfo{padding:7px 9px}
+.rcname{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.rcprice{font-size:11px;color:var(--g6)}
+.bbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,248,.97);backdrop-filter:blur(24px);border-top:1px solid var(--g2);padding:10px 1rem 18px;display:flex;gap:10px;z-index:60}
+.bwish{width:48px;height:48px;border:1.5px solid var(--g2);border-radius:8px;background:#fff;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.bwish.on{border-color:var(--red);color:var(--red)}
+.bcart{flex:1;height:48px;background:var(--blk);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
+.bcart:hover{background:#222}
+.barb{width:48px;height:48px;background:var(--blu);border:none;border-radius:8px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.barb:hover{background:var(--blu2)}
+.barb svg{width:20px;height:20px}
 
-/* SIZE */
-.section-block { padding: 14px 1.1rem; background: #fff; border-top: 6px solid var(--gray-100); }
-.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.section-title { font-size: 13px; font-weight: 500; }
-.size-guide { font-size: 12px; color: var(--blue); cursor: pointer; }
-.size-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-.size-btn {
-  min-width: 48px;
-  height: 40px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  transition: all 0.15s;
-  color: var(--black);
-}
-.size-btn:hover { border-color: var(--black); }
-.size-btn.active { border-color: var(--black); background: var(--black); color: #fff; }
-.size-btn.oos { color: var(--gray-400); text-decoration: line-through; cursor: not-allowed; }
-
-/* COLOUR SECTION */
-.colour-section { padding: 14px 1.1rem; background: #fff; border-top: 1px solid var(--gray-100); }
-
-/* FEATURES */
-.features { padding: 14px 1.1rem; background: #fff; border-top: 6px solid var(--gray-100); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.feature { display: flex; align-items: flex-start; gap: 8px; }
-.feature-icon { width: 32px; height: 32px; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.feature-text { font-size: 11px; color: var(--gray-600); line-height: 1.4; }
-.feature-text strong { display: block; color: var(--black); font-weight: 500; font-size: 12px; }
-
-/* RELATED */
-.related { padding: 14px 1.1rem 1.5rem; background: #fff; border-top: 6px solid var(--gray-100); }
-.related-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
-.related-scroll::-webkit-scrollbar { display: none; }
-.related-card { flex: 0 0 130px; cursor: pointer; border-radius: var(--radius-sm); overflow: hidden; border: 1.5px solid var(--gray-200); background: #fff; transition: all 0.15s; }
-.related-card:hover { border-color: var(--black); }
-.related-card.active { border-color: var(--blue); }
-.related-card-img { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: var(--gray-100); }
-.related-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.related-card-info { padding: 8px 9px; }
-.related-card-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-.related-card-price { font-size: 11px; color: var(--gray-600); }
-
-/* BOTTOM BAR */
-.bottom-bar {
-  position: sticky;
-  bottom: 0;
-  background: rgba(250,250,248,0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--gray-200);
-  padding: 12px 1.1rem;
-  display: flex;
-  gap: 10px;
-  z-index: 50;
-}
-.btn-wishlist { width: 48px; height: 48px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); background: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
-.btn-wishlist:hover { border-color: var(--red); color: var(--red); }
-.btn-cart { flex: 1; height: 48px; background: var(--black); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; letter-spacing: 0.02em; transition: all 0.15s; }
-.btn-cart:hover { background: #333; }
-.btn-ar { width: 48px; height: 48px; background: var(--blue); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
-.btn-ar:hover { background: #0040cc; }
-
-/* =================== AR FULLSCREEN =================== */
-.ar-screen {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 999;
-  display: none;
-  flex-direction: column;
-  max-width: 430px;
-  margin: 0 auto;
-}
-.ar-screen.open { display: flex; }
-
-/* AR video layer */
-.ar-cam { position: relative; flex: 1; overflow: hidden; }
-#ar-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
-#ar-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-/* AR top bar */
-.ar-topbar {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-  z-index: 10;
-}
-.ar-close-btn {
-  width: 36px; height: 36px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 50%;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.ar-title-pill {
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 100px;
-  max-width: 180px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ar-fitcheck-badge {
-  background: var(--blue);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 100px;
-  letter-spacing: 0.05em;
-}
-
-/* AR status pill */
-.ar-status-pill {
-  position: absolute;
-  bottom: 140px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 7px 18px;
-  border-radius: 100px;
-  white-space: nowrap;
-  z-index: 10;
-  transition: background 0.3s;
-}
-.ar-status-pill.tracked { background: rgba(0,166,81,0.85); }
-.ar-status-pill.error { background: rgba(224,49,49,0.85); }
-
-/* AR body guide outline */
-.ar-body-guide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 5;
-  opacity: 0.35;
-}
-.ar-body-guide.hidden { opacity: 0; transition: opacity 0.5s; }
-
-/* AR scan animation */
-.ar-scan-line {
-  position: absolute;
-  left: 20%;
-  right: 20%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, var(--blue), transparent);
-  animation: scanLine 2s ease-in-out infinite;
-  z-index: 6;
-  top: 20%;
-}
-@keyframes scanLine {
-  0% { top: 20%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 80%; opacity: 0; }
-}
-.ar-scan-line.hidden { display: none; }
-.ar-corner { position: absolute; width: 40px; height: 40px; border-color: rgba(255,255,255,0.6); border-style: solid; z-index: 6; }
-.ar-corner.tl { top: 15%; left: 15%; border-width: 2px 0 0 2px; }
-.ar-corner.tr { top: 15%; right: 15%; border-width: 2px 2px 0 0; }
-.ar-corner.bl { bottom: 20%; left: 15%; border-width: 0 0 2px 2px; }
-.ar-corner.br { bottom: 20%; right: 15%; border-width: 0 2px 2px 0; }
-
-/* AR bottom controls */
-.ar-bottom {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 16px 16px 28px;
-  background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-  z-index: 10;
-}
-.ar-items-row {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  scrollbar-width: none;
-  align-items: center;
-}
-.ar-items-row::-webkit-scrollbar { display: none; }
-.ar-item-thumb {
-  flex: 0 0 56px;
-  height: 56px;
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.25);
-  overflow: hidden;
-  cursor: pointer;
-  background: #fff;
-  transition: all 0.15s;
-  position: relative;
-}
-.ar-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.ar-item-thumb.active { border-color: var(--blue); transform: scale(1.08); }
-.ar-item-thumb .ar-thumb-check {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,87,255,0.3);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 16px;
-}
-.ar-item-thumb.active .ar-thumb-check { display: flex; }
-
-.ar-controls-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.ar-opacity-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-right: 16px; }
-.ar-opacity-label { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: 0.05em; }
-.ar-opacity-slider { width: 100%; height: 3px; accent-color: #fff; cursor: pointer; }
-.ar-snap-btn {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: #fff;
-  border: 3px solid rgba(255,255,255,0.4);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.1s;
-  position: relative;
-}
-.ar-snap-btn::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.15);
-}
-.ar-snap-btn:active { transform: scale(0.92); }
-.ar-flip-btn {
-  width: 44px; height: 44px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 50%;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  margin-left: 16px;
-}
-
-/* TOAST */
-.toast {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(10,10,10,0.9);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 100px;
-  z-index: 9999;
-  opacity: 0;
-  transition: all 0.3s;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* AR SCREEN */
+.arscr{position:fixed;inset:0;background:#000;z-index:999;display:none;flex-direction:column;max-width:430px;margin:0 auto}
+.arscr.open{display:flex;animation:fuIn .25s ease}
+@keyframes fuIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.arcam{position:relative;flex:1;overflow:hidden}
+#arv{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+#arc{position:absolute;inset:0;width:100%;height:100%}
+.corner{position:absolute;width:46px;height:46px;border-color:rgba(255,255,255,.65);border-style:solid;z-index:8;transition:all .4s}
+.corner.tl{top:11%;left:11%;border-width:2.5px 0 0 2.5px;border-radius:5px 0 0 0}
+.corner.tr{top:11%;right:11%;border-width:2.5px 2.5px 0 0;border-radius:0 5px 0 0}
+.corner.bl{bottom:16%;left:11%;border-width:0 0 2.5px 2.5px;border-radius:0 0 0 5px}
+.corner.br{bottom:16%;right:11%;border-width:0 2.5px 2.5px 0;border-radius:0 0 5px 0}
+.corner.go{border-color:var(--grn)}
+.scanline{position:absolute;left:11%;right:11%;height:1.5px;background:linear-gradient(to right,transparent,rgba(0,82,255,.95),transparent);box-shadow:0 0 10px 2px rgba(0,82,255,.5);animation:scan 2.2s ease-in-out infinite;z-index:7}
+@keyframes scan{0%{top:11%;opacity:0}8%{opacity:1}92%{opacity:1}100%{top:84%;opacity:0}}
+.scanline.done{display:none}
+.bguide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:6;transition:opacity .6s}
+.bguide.gone{opacity:0}
+.bguide svg{filter:drop-shadow(0 0 10px rgba(0,82,255,.4))}
+.arstat{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:12px;font-weight:500;padding:8px 20px;border-radius:100px;white-space:nowrap;z-index:10;transition:all .3s;text-align:center;max-width:280px}
+.arstat.ok{background:rgba(0,176,96,.9);border-color:transparent}
+.arstat.err{background:rgba(224,48,48,.9);border-color:transparent}
+.artop{position:absolute;top:0;left:0;right:0;padding:14px 15px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);z-index:10}
+.arclose{width:38px;height:38px;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.arname{background:rgba(0,0,0,.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:500;padding:6px 16px;border-radius:100px;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arbadge{background:var(--blu);color:#fff;font-size:9.5px;font-weight:800;padding:5px 11px;border-radius:100px;letter-spacing:.06em}
+.arbtm{position:absolute;bottom:0;left:0;right:0;padding:12px 15px 26px;background:linear-gradient(to top,rgba(0,0,0,.82),transparent);z-index:10}
+.arthumbs{display:flex;gap:9px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;align-items:flex-end}
+.arthumbs::-webkit-scrollbar{display:none}
+.arth{flex:0 0 56px;height:56px;border-radius:13px;border:2px solid rgba(255,255,255,.2);overflow:hidden;cursor:pointer;background:#fff;transition:all .18s;position:relative;flex-shrink:0}
+.arth img{width:100%;height:100%;object-fit:cover}
+.arth.on{border-color:var(--blu);transform:scale(1.1);box-shadow:0 0 0 3px rgba(0,82,255,.35)}
+.arth-ck{position:absolute;inset:0;background:rgba(0,82,255,.32);display:none;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700}
+.arth.on .arth-ck{display:flex}
+.arctrl{display:flex;align-items:center;gap:12px}
+.arsliders{flex:1;display:flex;flex-direction:column;gap:7px}
+.asrow{display:flex;flex-direction:column;gap:3px}
+.aslbl{font-size:9.5px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.07em}
+.asl{width:100%;accent-color:#fff;cursor:pointer;height:3px}
+.arsnap{width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid rgba(255,255,255,.3);cursor:pointer;flex-shrink:0;transition:transform .12s;position:relative}
+.arsnap::after{content:'';position:absolute;inset:5px;border-radius:50%;border:2px solid rgba(0,0,0,.1)}
+.arsnap:active{transform:scale(.88)}
+.arflip{width:46px;height:46px;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:#fff;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.flash{position:fixed;inset:0;background:#fff;z-index:9999;opacity:0;pointer-events:none;transition:opacity .06s}
+.flash.pop{opacity:1}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(8,8,8,.92);color:#fff;font-size:13px;font-weight:500;padding:10px 22px;border-radius:100px;z-index:9999;opacity:0;transition:all .28s;white-space:nowrap;pointer-events:none;max-width:300px;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="nav">
   <button class="nav-back">←</button>
-  <div class="nav-brand">Fit<span>Check</span></div>
+  <div class="nav-logo">Fit<span>Check</span></div>
   <div class="nav-right">
-    <button class="nav-icon">🔍</button>
-    <button class="nav-icon nav-cart-badge">🛒</button>
+    <button class="nib">🔍</button>
+    <button class="nib">🛒<div class="cdot"></div></button>
   </div>
 </nav>
 
-<!-- PRODUCT MEDIA -->
-<div class="product-media">
-  <div class="media-container" id="media-container">
-
-    <!-- Photos swiper -->
-    <div class="photos-swiper" id="photos-swiper">
-      <div class="photo-slide"><img id="slide-1" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
-      <div class="photo-slide"><img id="slide-2" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
-      <div class="photo-slide"><img id="slide-3" src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90" alt=""/></div>
+<div class="media-wrap">
+  <div class="media-inner">
+    <!-- PHOTOS -->
+    <div class="swiper" id="swiper">
+      <div class="slide"><img id="s0" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
+      <div class="slide"><img id="s1" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
+      <div class="slide"><img id="s2" src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90" alt=""/></div>
     </div>
 
-    <!-- 360 view -->
-    <div class="view-360" id="view-360">
-      <img class="view-360-img" id="img-360" src="" alt="360"/>
-      <div class="rotate-arrows">
-        <button class="rotate-arrow" id="rot-left">‹</button>
-        <button class="rotate-arrow" id="rot-right">›</button>
+    <!-- 3D VIEWER -->
+    <div class="viewer3d" id="viewer3d">
+      <canvas id="threeCanvas"></canvas>
+      <div class="v3d-loading" id="v3dLoad">
+        <div class="v3d-spinner"></div>
+        <div class="v3d-load-txt">Loading 3D viewer...</div>
       </div>
-      <div class="degrees-badge" id="deg-badge">0°</div>
-      <div class="view-360-hint">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9"/><path d="M15 9l-3-3-3 3"/></svg>
-        Drag to rotate 360°
+      <div class="v3d-ui">
+        <button class="v3d-reset" onclick="reset3D()">⟳ Reset view</button>
+        <div class="v3d-deg" id="v3dDeg">0°</div>
+        <div class="v3d-hint" id="v3dHint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3"/></svg>
+          Drag to rotate · Pinch to zoom
+        </div>
+        <div class="v3d-zoom">
+          <button class="v3d-zbtn" onclick="zoom3D(1.2)">+</button>
+          <button class="v3d-zbtn" onclick="zoom3D(0.8)">−</button>
+        </div>
       </div>
     </div>
 
-    <div class="media-dots" id="media-dots">
-      <div class="media-dot active"></div>
-      <div class="media-dot"></div>
-      <div class="media-dot"></div>
+    <div class="mdots" id="mdots">
+      <div class="mdot on"></div><div class="mdot"></div><div class="mdot"></div>
     </div>
   </div>
 
-  <!-- View tabs -->
-  <div class="view-tabs">
-    <div class="view-tab active" id="tab-photos" onclick="switchView('photos')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Photos
+  <div class="tabs">
+    <div class="tab on" id="tph" onclick="setView('photos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Photos
     </div>
-    <div class="view-tab" id="tab-360" onclick="switchView('360')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3c-2.33 3.12-3.5 5.88-3.5 9s1.17 5.88 3.5 9M12 3c2.33 3.12 3.5 5.88 3.5 9s-1.17 5.88-3.5 9"/></svg>
-      360° View
+    <div class="tab" id="t360" onclick="setView('360')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="10"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3c-2.5 3-4 6-4 9s1.5 6 4 9M12 3c2.5 3 4 6 4 9s-1.5 6-4 9"/></svg>360° View
     </div>
-    <div class="view-tab ar" id="tab-ar" onclick="openAR()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-      AR Try On
+    <div class="tab ar-tab" id="tar" onclick="openAR()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>AR Try On
     </div>
   </div>
 </div>
 
-<!-- PRODUCT INFO -->
-<div class="product-info">
-  <div class="brand-name">FitCheck Collection</div>
-  <div class="product-title" id="prod-title">Black Premium Hoodie</div>
-  <div class="rating-row">
-    <span class="stars-filled">★★★★★</span>
-    <span class="rating-num">4.8</span>
-    <div class="rating-divider"></div>
-    <span class="rating-count">2,847 reviews</span>
-    <div class="rating-divider"></div>
-    <span class="reviews-link">View all</span>
+<div class="pinfo">
+  <div class="brand">FitCheck Collection</div>
+  <div class="ptitle" id="ptitle">Black Premium Hoodie</div>
+  <div class="rrow">
+    <span class="stars">★★★★★</span><span class="rnum">4.9</span>
+    <div class="rdiv"></div><span class="rcnt">3,241 reviews</span>
+    <div class="rdiv"></div><span class="rlink">See all →</span>
   </div>
-  <div class="price-row">
-    <span class="price-main" id="prod-price">$59.99</span>
-    <span class="price-old">$89.99</span>
-    <span class="price-off">33% OFF</span>
+  <div class="prow">
+    <span class="pmain" id="pprice">$59.99</span>
+    <span class="pold">$89.99</span>
+    <span class="poff">33% OFF</span>
   </div>
-  <div class="offer-tag">✦ Buy 1 Get 1 Free &nbsp;·&nbsp; Free delivery over $50</div>
+  <div class="orow">✦ Buy 1 Get 1 Free · Free delivery over $50 · 30-day returns</div>
 </div>
 
-<!-- COLOUR -->
-<div class="colour-section section-block">
-  <div class="section-head">
-    <div class="section-title">Colour — <span id="colour-label" style="color:var(--gray-600);font-weight:400;">Jet Black</span></div>
-  </div>
-  <div class="colour-row" id="colour-row"></div>
+<div class="sec">
+  <div class="sh"><div class="st">Colour — <span id="clbl" style="color:var(--g6);font-weight:400">Jet Black</span></div></div>
+  <div class="crow" id="crow"></div>
 </div>
 
-<!-- SIZE -->
-<div class="section-block">
-  <div class="section-head">
-    <div class="section-title">Size</div>
-    <div class="size-guide">Size guide →</div>
-  </div>
-  <div class="size-grid">
-    <div class="size-btn oos" title="Out of stock">XS</div>
-    <div class="size-btn" onclick="pickSize(this)">S</div>
-    <div class="size-btn active" onclick="pickSize(this)">M</div>
-    <div class="size-btn" onclick="pickSize(this)">L</div>
-    <div class="size-btn" onclick="pickSize(this)">XL</div>
-    <div class="size-btn" onclick="pickSize(this)">XXL</div>
+<div class="sec">
+  <div class="sh"><div class="st">Size</div><div class="sl">Size guide →</div></div>
+  <div class="sgrid">
+    <div class="sbtn oos">XS</div>
+    <div class="sbtn" onclick="pickSz(this)">S</div>
+    <div class="sbtn on" onclick="pickSz(this)">M</div>
+    <div class="sbtn" onclick="pickSz(this)">L</div>
+    <div class="sbtn" onclick="pickSz(this)">XL</div>
+    <div class="sbtn" onclick="pickSz(this)">XXL</div>
   </div>
 </div>
 
-<!-- FEATURES -->
-<div class="features">
-  <div class="feature"><div class="feature-icon">🚚</div><div class="feature-text"><strong>Free Delivery</strong>Orders over $50</div></div>
-  <div class="feature"><div class="feature-icon">↩️</div><div class="feature-text"><strong>30-Day Returns</strong>Easy returns</div></div>
-  <div class="feature"><div class="feature-icon">✦</div><div class="feature-text"><strong>Premium Quality</strong>100% Cotton</div></div>
-  <div class="feature"><div class="feature-icon">🔒</div><div class="feature-text"><strong>Secure Pay</strong>256-bit SSL</div></div>
+<div class="feats">
+  <div class="feat"><div class="fic">🚚</div><div class="ftx"><strong>Free Delivery</strong>Orders over $50</div></div>
+  <div class="feat"><div class="fic">↩️</div><div class="ftx"><strong>30-Day Returns</strong>Hassle-free</div></div>
+  <div class="feat"><div class="fic">🪡</div><div class="ftx"><strong>Premium Cotton</strong>400 GSM</div></div>
+  <div class="feat"><div class="fic">🔒</div><div class="ftx"><strong>Secure Pay</strong>256-bit SSL</div></div>
 </div>
 
-<!-- RELATED -->
-<div class="related">
-  <div class="section-head" style="margin-bottom:10px;">
-    <div class="section-title">More items to try on</div>
-    <div style="font-size:12px;color:var(--blue);cursor:pointer;">See all →</div>
-  </div>
-  <div class="related-scroll" id="related-scroll"></div>
+<div class="related sec">
+  <div class="sh"><div class="st">More to try on</div><div class="sl">See all →</div></div>
+  <div class="rscroll" id="rscroll"></div>
 </div>
 
-<!-- BOTTOM BAR -->
-<div class="bottom-bar">
-  <button class="btn-wishlist" onclick="toggleWishlist(this)">♡</button>
-  <button class="btn-cart" onclick="showToast('Added to cart!')">Add to Cart</button>
-  <button class="btn-ar" onclick="openAR()" title="AR Try On">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+<div class="bbar">
+  <button class="bwish" id="wbtn" onclick="toggleWish()">♡</button>
+  <button class="bcart" onclick="showToast('Added to cart! 🛒')">Add to Cart</button>
+  <button class="barb" onclick="openAR()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
   </button>
 </div>
 
-<!-- =================== AR FULLSCREEN =================== -->
-<div class="ar-screen" id="ar-screen">
-  <div class="ar-cam" id="ar-cam">
-    <video id="ar-video" autoplay playsinline muted></video>
-    <canvas id="ar-canvas"></canvas>
-
-    <!-- scanning corners -->
-    <div class="ar-corner tl"></div>
-    <div class="ar-corner tr"></div>
-    <div class="ar-corner bl"></div>
-    <div class="ar-corner br"></div>
-
-    <!-- scan line -->
-    <div class="ar-scan-line" id="ar-scan-line"></div>
-
-    <!-- body guide -->
-    <div class="ar-body-guide" id="ar-body-guide">
-      <svg width="120" height="240" viewBox="0 0 120 240" fill="none" stroke="white" stroke-width="1.5" opacity="0.6">
-        <ellipse cx="60" cy="28" rx="22" ry="26"/>
-        <line x1="60" y1="54" x2="60" y2="140"/>
-        <line x1="60" y1="75" x2="18" y2="120"/>
-        <line x1="60" y1="75" x2="102" y2="120"/>
-        <line x1="60" y1="140" x2="36" y2="220"/>
-        <line x1="60" y1="140" x2="84" y2="220"/>
+<!-- AR FULLSCREEN -->
+<div class="arscr" id="arscr">
+  <div class="arcam">
+    <video id="arv" autoplay playsinline muted></video>
+    <canvas id="arc"></canvas>
+    <div class="corner tl" id="ctl"></div>
+    <div class="corner tr" id="ctr"></div>
+    <div class="corner bl" id="cbl"></div>
+    <div class="corner br" id="cbr"></div>
+    <div class="scanline" id="scanline"></div>
+    <div class="bguide" id="bguide">
+      <svg width="140" height="280" viewBox="0 0 140 280" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5">
+        <ellipse cx="70" cy="32" rx="25" ry="29"/>
+        <line x1="70" y1="61" x2="70" y2="165"/>
+        <line x1="70" y1="88" x2="18" y2="140"/>
+        <line x1="70" y1="88" x2="122" y2="140"/>
+        <line x1="70" y1="165" x2="42" y2="260"/>
+        <line x1="70" y1="165" x2="98" y2="260"/>
+        <line x1="18" y1="80" x2="122" y2="80" stroke-dasharray="4 4" stroke-opacity=".3"/>
+        <line x1="36" y1="155" x2="104" y2="155" stroke-dasharray="4 4" stroke-opacity=".3"/>
       </svg>
     </div>
-
-    <!-- status -->
-    <div class="ar-status-pill" id="ar-status">Starting camera...</div>
-
-    <!-- top bar -->
-    <div class="ar-topbar">
-      <button class="ar-close-btn" onclick="closeAR()">✕</button>
-      <div class="ar-title-pill" id="ar-item-label">Black Hoodie</div>
-      <div class="ar-fitcheck-badge">FITCHECK AR</div>
+    <div class="arstat" id="arstat">Starting camera...</div>
+    <div class="artop">
+      <button class="arclose" onclick="closeAR()">✕</button>
+      <div class="arname" id="arname">Black Hoodie</div>
+      <div class="arbadge">FITCHECK AR</div>
     </div>
-
-    <!-- bottom -->
-    <div class="ar-bottom">
-      <div class="ar-items-row" id="ar-items-row"></div>
-      <div class="ar-controls-row">
-        <div class="ar-opacity-wrap">
-          <div class="ar-opacity-label">OPACITY</div>
-          <input type="range" class="ar-opacity-slider" id="ar-opacity" min="40" max="100" value="90" step="5"/>
+    <div class="arbtm">
+      <div class="arthumbs" id="arthumbs"></div>
+      <div class="arctrl">
+        <div class="arsliders">
+          <div class="asrow"><div class="aslbl">OPACITY</div><input type="range" class="asl" id="aropa" min="30" max="100" value="88" step="4"/></div>
+          <div class="asrow"><div class="aslbl">SCALE</div><input type="range" class="asl" id="arsc" min="75" max="140" value="100" step="2"/></div>
         </div>
-        <button class="ar-flip-btn" onclick="flipCamera()" title="Flip camera">⟳</button>
-        <button class="ar-snap-btn" onclick="snapPhoto()" title="Capture"></button>
+        <button class="arflip" onclick="flipCam()">⟳</button>
+        <button class="arsnap" onclick="doSnap()"></button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="flash" id="flash"></div>
+<div class="toast" id="toastEl"></div>
 
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script>
 
-// ===================== DATA =====================
-const items = [
-  { id:1, name:'Black Premium Hoodie', price:'$59.99', url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90', color:'#1a1a1a', colourName:'Jet Black' },
-  { id:2, name:'White Essential Tee', price:'$29.99', url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90', color:'#f0f0ee', colourName:'Pure White' },
-  { id:3, name:'Indigo Denim Jacket', price:'$89.99', url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90', color:'#3a5a8a', colourName:'Indigo Blue' },
-  { id:4, name:'Camel Trench Coat', price:'$129.99', url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90', color:'#c4a57a', colourName:'Camel' },
-  { id:5, name:'Ash Grey Sweatshirt', price:'$49.99', url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90', color:'#8a8a86', colourName:'Ash Grey' },
-  { id:6, name:'Navy Classic Polo', price:'$39.99', url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90', color:'#1a2f5a', colourName:'Navy' },
+<script>
+// ════════════════════════════════════
+// DATA
+// ════════════════════════════════════
+const ITEMS = [
+  {id:1,name:'Black Premium Hoodie',price:'$59.99',url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90',color:'#1a1a1a',hex:0x1a1a1a,cname:'Jet Black'},
+  {id:2,name:'White Essential Tee',price:'$29.99',url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90',color:'#f0f0ee',hex:0xf0f0ee,cname:'Pure White'},
+  {id:3,name:'Indigo Denim Jacket',price:'$89.99',url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90',color:'#3a5a8a',hex:0x3a5a8a,cname:'Indigo Blue'},
+  {id:4,name:'Camel Trench Coat',price:'$129.99',url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90',color:'#c4a57a',hex:0xc4a57a,cname:'Camel'},
+  {id:5,name:'Ash Grey Sweatshirt',price:'$49.99',url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90',color:'#8a8a86',hex:0x8a8a86,cname:'Ash Grey'},
+  {id:6,name:'Navy Polo',price:'$39.99',url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90',color:'#1a2f5a',hex:0x1a2f5a,cname:'Navy'},
 ];
 
-// 360 frames: rotate hue of the same image to simulate angle change
-const frame360Urls = [0,1,2,3,4,5,6,7].map(i =>
-  `https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80&sat=${i*10}`
-);
+let SEL = ITEMS[0];
+let mpCam = null, facing = 'user', scanDone = false;
+const CACHE = {};
+let smX=0,smY=0,smW=0,smH=0,smA=0;
+const SM = 0.18;
 
-let selectedItem = items[0];
-let currentView = 'photos';
-let arOpacity = 0.9;
-let mpCamera = null;
-let facingMode = 'user';
-let scanComplete = false;
-const imgCache = {};
+// Three.js globals
+let renderer, scene, camera, orbitControls, animId;
+let mannequin, clothMesh, clothTexture;
+let threeReady = false;
 
-// ===================== INIT =====================
-function init() {
-  renderRelated();
-  renderARItems();
-  renderColours();
-  initPhotoSwiper();
-  init360();
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+function init(){
+  renderRelated(); renderThumbs(); renderColours();
+  initSwiper();
+  ITEMS.forEach(i => preload(i.url));
 }
 
-// ===================== RELATED =====================
-function renderRelated() {
-  const row = document.getElementById('related-scroll');
-  row.innerHTML = '';
-  items.forEach(item => {
-    const el = document.createElement('div');
-    el.className = 'related-card' + (item.id === selectedItem.id ? ' active' : '');
-    el.onclick = () => selectItem(item);
-    el.innerHTML = `<div class="related-card-img"><img src="${item.url}" alt="${item.name}" loading="lazy" onerror="this.parentNode.style.background='#eee'"/></div><div class="related-card-info"><div class="related-card-name">${item.name}</div><div class="related-card-price">${item.price}</div></div>`;
-    row.appendChild(el);
+function preload(url){
+  if(CACHE[url]) return;
+  const img = new Image(); img.crossOrigin='anonymous'; img.src=url; CACHE[url]=img;
+}
+
+function selectItem(item){
+  SEL = item;
+  document.getElementById('ptitle').textContent = item.name;
+  document.getElementById('pprice').textContent = item.price;
+  document.getElementById('arname').textContent = item.name;
+  document.querySelectorAll('.slide img').forEach(img => img.src = item.url);
+  smX=smY=smW=smH=0;
+  if(threeReady) updateClothMaterial();
+  renderRelated(); renderThumbs(); renderColours();
+  preload(item.url);
+}
+
+function renderRelated(){
+  const el=document.getElementById('rscroll'); el.innerHTML='';
+  ITEMS.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='rcard'+(item.id===SEL.id?' on':'');
+    d.onclick=()=>selectItem(item);
+    d.innerHTML=`<div class="rcimg"><img src="${item.url}" loading="lazy" onerror="this.parentNode.style.background='#eee'"/></div><div class="rcinfo"><div class="rcname">${item.name}</div><div class="rcprice">${item.price}</div></div>`;
+    el.appendChild(d);
   });
 }
 
-function renderARItems() {
-  const row = document.getElementById('ar-items-row');
-  row.innerHTML = '';
-  items.forEach(item => {
-    const el = document.createElement('div');
-    el.className = 'ar-item-thumb' + (item.id === selectedItem.id ? ' active' : '');
-    el.onclick = () => selectItem(item);
-    el.innerHTML = `<img src="${item.url}" alt="${item.name}" loading="lazy"/><div class="ar-thumb-check">✓</div>`;
-    row.appendChild(el);
+function renderThumbs(){
+  const el=document.getElementById('arthumbs'); el.innerHTML='';
+  ITEMS.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='arth'+(item.id===SEL.id?' on':'');
+    d.onclick=()=>selectItem(item);
+    d.innerHTML=`<img src="${item.url}" loading="lazy"/><div class="arth-ck">✓</div>`;
+    el.appendChild(d);
   });
 }
 
-function renderColours() {
-  const row = document.getElementById('colour-row');
-  row.innerHTML = '';
-  items.forEach((item, i) => {
-    const sw = document.createElement('div');
-    sw.className = 'colour-swatch' + (item.id === selectedItem.id ? ' active' : '');
-    sw.style.background = item.color;
-    sw.style.border = item.color === '#f0f0ee' ? '2px solid #ddd' : '2px solid transparent';
-    sw.onclick = () => selectItem(item);
-    row.appendChild(sw);
+function renderColours(){
+  const el=document.getElementById('crow'); el.innerHTML='';
+  ITEMS.forEach(item=>{
+    const sw=document.createElement('div');
+    sw.className='csw'+(item.id===SEL.id?' on':'');
+    sw.style.background=item.color;
+    if(item.color==='#f0f0ee') sw.style.border='2.5px solid #ccc';
+    sw.onclick=()=>selectItem(item);
+    sw.title=item.cname;
+    el.appendChild(sw);
   });
-  document.getElementById('colour-label').textContent = selectedItem.colourName;
+  document.getElementById('clbl').textContent=SEL.cname;
 }
 
-function selectItem(item) {
-  selectedItem = item;
-  document.getElementById('prod-title').textContent = item.name;
-  document.getElementById('prod-price').textContent = item.price;
-  document.getElementById('ar-item-label').textContent = item.name;
-  // update photos
-  document.querySelectorAll('.photo-slide img').forEach(img => img.src = item.url);
-  document.getElementById('img-360').src = item.url;
-  renderRelated();
-  renderARItems();
-  renderColours();
-  preloadImg(item.url);
+function initSwiper(){
+  const sw=document.getElementById('swiper');
+  const dots=document.querySelectorAll('.mdot');
+  sw.addEventListener('scroll',()=>{
+    const i=Math.round(sw.scrollLeft/sw.offsetWidth);
+    dots.forEach((d,j)=>d.classList.toggle('on',j===i));
+  },{passive:true});
 }
 
-function preloadImg(url) {
-  if (!imgCache[url]) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = url;
-    imgCache[url] = img;
+// ════════════════════════════════════
+// THREE.JS 3D VIEWER
+// The real Tinkercad-style full 3D rotation
+// ════════════════════════════════════
+function init3D(){
+  if(threeReady) return;
+  const container = document.getElementById('viewer3d');
+  const canvas = document.getElementById('threeCanvas');
+  const w = container.offsetWidth;
+  const h = container.offsetHeight;
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  // Scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0f0f1a);
+  scene.fog = new THREE.FogExp2(0x0f0f1a, 0.08);
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 100);
+  camera.position.set(0, 1.6, 4.5);
+
+  // Lights
+  const ambLight = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  dirLight.position.set(3, 6, 4);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 1024;
+  dirLight.shadow.mapSize.height = 1024;
+  scene.add(dirLight);
+
+  const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+  fillLight.position.set(-3, 2, -2);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  rimLight.position.set(0, 4, -5);
+  scene.add(rimLight);
+
+  // Ground
+  const groundGeo = new THREE.PlaneGeometry(20, 20);
+  const groundMat = new THREE.MeshLambertMaterial({color:0x111122});
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Grid
+  const grid = new THREE.GridHelper(10, 20, 0x222244, 0x222244);
+  grid.position.y = 0.001;
+  scene.add(grid);
+
+  // Build mannequin + clothing
+  buildMannequin();
+
+  // Orbit Controls (manual implementation — same as Tinkercad)
+  setupOrbitControls(canvas);
+
+  // Resize
+  window.addEventListener('resize', ()=>{
+    if(!threeReady) return;
+    const w2=container.offsetWidth, h2=container.offsetHeight;
+    renderer.setSize(w2,h2);
+    camera.aspect=w2/h2;
+    camera.updateProjectionMatrix();
+  });
+
+  threeReady = true;
+  document.getElementById('v3dLoad').classList.add('done');
+
+  // Animate
+  animate3D();
+
+  // Hide hint after 4s
+  setTimeout(()=>document.getElementById('v3dHint').classList.add('gone'), 4000);
+}
+
+function buildMannequin(){
+  mannequin = new THREE.Group();
+
+  const skinMat = new THREE.MeshLambertMaterial({color:0xc8a882});
+  const darkMat = new THREE.MeshLambertMaterial({color:0x222233});
+
+  // Head
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.22,16,12), skinMat);
+  head.position.set(0,3.1,0); head.castShadow=true;
+  mannequin.add(head);
+
+  // Neck
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.1,0.2,12), skinMat);
+  neck.position.set(0,2.85,0); neck.castShadow=true;
+  mannequin.add(neck);
+
+  // Torso
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.9,0.35), darkMat);
+  torso.position.set(0,2.2,0); torso.castShadow=true;
+  mannequin.add(torso);
+
+  // Hips
+  const hips = new THREE.Mesh(new THREE.BoxGeometry(0.72,0.4,0.36), darkMat);
+  hips.position.set(0,1.68,0); hips.castShadow=true;
+  mannequin.add(hips);
+
+  // Left upper arm
+  const lua = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.08,0.44,10), skinMat);
+  lua.position.set(-0.47,2.35,0); lua.rotation.z=0.2; lua.castShadow=true;
+  mannequin.add(lua);
+  // Left lower arm
+  const lla = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.065,0.4,10), skinMat);
+  lla.position.set(-0.6,1.98,0); lla.rotation.z=0.1; lla.castShadow=true;
+  mannequin.add(lla);
+
+  // Right upper arm
+  const rua = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.08,0.44,10), skinMat);
+  rua.position.set(0.47,2.35,0); rua.rotation.z=-0.2; rua.castShadow=true;
+  mannequin.add(rua);
+  // Right lower arm
+  const rla = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.065,0.4,10), skinMat);
+  rla.position.set(0.6,1.98,0); rla.rotation.z=-0.1; rla.castShadow=true;
+  mannequin.add(rla);
+
+  // Left leg
+  const ll = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.1,0.76,10), darkMat);
+  ll.position.set(-0.18,1.1,0); ll.castShadow=true;
+  mannequin.add(ll);
+  const llL = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.09,0.68,10), darkMat);
+  llL.position.set(-0.18,0.38,0); llL.castShadow=true;
+  mannequin.add(llL);
+
+  // Right leg
+  const rl = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.1,0.76,10), darkMat);
+  rl.position.set(0.18,1.1,0); rl.castShadow=true;
+  mannequin.add(rl);
+  const rlL = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.09,0.68,10), darkMat);
+  rlL.position.set(0.18,0.38,0); rlL.castShadow=true;
+  mannequin.add(rlL);
+
+  // Feet
+  const footGeo = new THREE.BoxGeometry(0.15,0.07,0.28);
+  const lFoot = new THREE.Mesh(footGeo, darkMat);
+  lFoot.position.set(-0.18,0.04,0.06);
+  mannequin.add(lFoot);
+  const rFoot = new THREE.Mesh(footGeo, darkMat);
+  rFoot.position.set(0.18,0.04,0.06);
+  mannequin.add(rFoot);
+
+  scene.add(mannequin);
+
+  // Now build the clothing mesh on top
+  buildClothMesh();
+}
+
+function buildClothMesh(){
+  // Load the clothing as a texture on a body-shaped mesh
+  const loader = new THREE.TextureLoader();
+  loader.crossOrigin = 'anonymous';
+
+  clothTexture = loader.load(SEL.url, ()=>{
+    clothTexture.encoding = THREE.sRGBEncoding;
+  });
+
+  // Clothing = slightly larger torso + arms geometry with the real clothing photo as texture
+  clothMesh = new THREE.Group();
+
+  // Main body of clothing
+  const bodyGeo = new THREE.BoxGeometry(0.82,0.96,0.42);
+  const bodyMat = new THREE.MeshLambertMaterial({map:clothTexture, transparent:true, opacity:0.95});
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.set(0,2.19,0); body.castShadow=true;
+  clothMesh.add(body);
+
+  // Left sleeve
+  const lSleeveGeo = new THREE.CylinderGeometry(0.11,0.09,0.52,10);
+  const sleeveMat = new THREE.MeshLambertMaterial({color:SEL.hex});
+  const lSleeve = new THREE.Mesh(lSleeveGeo, sleeveMat);
+  lSleeve.position.set(-0.52,2.27,0); lSleeve.rotation.z=0.22; lSleeve.castShadow=true;
+  clothMesh.add(lSleeve);
+
+  // Right sleeve
+  const rSleeve = new THREE.Mesh(lSleeveGeo, sleeveMat);
+  rSleeve.position.set(0.52,2.27,0); rSleeve.rotation.z=-0.22; rSleeve.castShadow=true;
+  clothMesh.add(rSleeve);
+
+  // Collar
+  const collarGeo = new THREE.TorusGeometry(0.14,0.04,8,16);
+  const collarMat = new THREE.MeshLambertMaterial({color:SEL.hex});
+  const collar = new THREE.Mesh(collarGeo, collarMat);
+  collar.position.set(0,2.69,0); collar.rotation.x=Math.PI/2;
+  clothMesh.add(collar);
+
+  scene.add(clothMesh);
+}
+
+function updateClothMaterial(){
+  if(!clothMesh) return;
+  const loader = new THREE.TextureLoader();
+  loader.crossOrigin = 'anonymous';
+  const newTex = loader.load(SEL.url, ()=>{
+    newTex.encoding = THREE.sRGBEncoding;
+    clothMesh.children[0].material.map = newTex;
+    clothMesh.children[0].material.needsUpdate = true;
+  });
+  // Update sleeve colour
+  const sColor = new THREE.Color(SEL.hex);
+  clothMesh.children[1].material.color = sColor;
+  clothMesh.children[2].material.color = sColor;
+  clothMesh.children[3].material.color = sColor;
+}
+
+// ════════════════════════════════════
+// ORBIT CONTROLS — Manual implementation
+// Same feel as Tinkercad / Google model viewer
+// ════════════════════════════════════
+let orb = {
+  theta: 0, phi: Math.PI/3,
+  radius: 4.5,
+  dragging: false,
+  lastX: 0, lastY: 0,
+  velTheta: 0, velPhi: 0,
+  target: new THREE.Vector3(0, 1.8, 0),
+  // pinch
+  pinching: false, pinchDist: 0
+};
+
+function setupOrbitControls(canvas){
+  canvas.addEventListener('mousedown', e=>{orb.dragging=true;orb.lastX=e.clientX;orb.lastY=e.clientY;orb.velTheta=0;orb.velPhi=0});
+  canvas.addEventListener('touchstart', e=>{
+    if(e.touches.length===1){orb.dragging=true;orb.lastX=e.touches[0].clientX;orb.lastY=e.touches[0].clientY;orb.velTheta=0;orb.velPhi=0}
+    if(e.touches.length===2){orb.pinching=true;orb.pinchDist=getPinchDist(e)}
+  },{passive:true});
+
+  window.addEventListener('mousemove', e=>{
+    if(!orb.dragging)return;
+    const dx=e.clientX-orb.lastX, dy=e.clientY-orb.lastY;
+    orb.velTheta=dx*0.005; orb.velPhi=dy*0.005;
+    orb.theta-=dx*0.008; orb.phi-=dy*0.006;
+    orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi));
+    orb.lastX=e.clientX; orb.lastY=e.clientY;
+    updateCameraOrbit();
+    updateDegDisplay();
+  });
+  window.addEventListener('touchmove', e=>{
+    if(orb.dragging&&e.touches.length===1){
+      const dx=e.touches[0].clientX-orb.lastX, dy=e.touches[0].clientY-orb.lastY;
+      orb.velTheta=dx*0.005; orb.velPhi=dy*0.005;
+      orb.theta-=dx*0.008; orb.phi-=dy*0.006;
+      orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi));
+      orb.lastX=e.touches[0].clientX; orb.lastY=e.touches[0].clientY;
+      updateCameraOrbit(); updateDegDisplay();
+    }
+    if(orb.pinching&&e.touches.length===2){
+      const d=getPinchDist(e);
+      orb.radius*=orb.pinchDist/d;
+      orb.radius=Math.max(2,Math.min(10,orb.radius));
+      orb.pinchDist=d;
+      updateCameraOrbit();
+    }
+  },{passive:true});
+
+  window.addEventListener('mouseup',()=>{orb.dragging=false;startMomentum()});
+  window.addEventListener('touchend',()=>{orb.dragging=false;orb.pinching=false;startMomentum()});
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    orb.radius+=e.deltaY*0.005;
+    orb.radius=Math.max(2,Math.min(10,orb.radius));
+    updateCameraOrbit();
+  },{passive:false});
+}
+
+function getPinchDist(e){
+  const dx=e.touches[0].clientX-e.touches[1].clientX;
+  const dy=e.touches[0].clientY-e.touches[1].clientY;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+
+let momRaf=null;
+function startMomentum(){
+  cancelAnimationFrame(momRaf);
+  const step=()=>{
+    orb.velTheta*=0.93; orb.velPhi*=0.93;
+    if(Math.abs(orb.velTheta)<0.0002&&Math.abs(orb.velPhi)<0.0002) return;
+    orb.theta-=orb.velTheta*10; orb.phi-=orb.velPhi*10;
+    orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi));
+    updateCameraOrbit(); updateDegDisplay();
+    momRaf=requestAnimationFrame(step);
+  };
+  momRaf=requestAnimationFrame(step);
+}
+
+function updateCameraOrbit(){
+  const x=orb.target.x+orb.radius*Math.sin(orb.phi)*Math.sin(orb.theta);
+  const y=orb.target.y+orb.radius*Math.cos(orb.phi);
+  const z=orb.target.z+orb.radius*Math.sin(orb.phi)*Math.cos(orb.theta);
+  camera.position.set(x,y,z);
+  camera.lookAt(orb.target);
+}
+
+function updateDegDisplay(){
+  const deg=((orb.theta*180/Math.PI)%360+360)%360;
+  document.getElementById('v3dDeg').textContent=Math.round(deg)+'°';
+}
+
+function reset3D(){
+  orb.theta=0; orb.phi=Math.PI/3; orb.radius=4.5;
+  orb.velTheta=0; orb.velPhi=0;
+  updateCameraOrbit(); updateDegDisplay();
+}
+
+function zoom3D(factor){
+  orb.radius*=factor;
+  orb.radius=Math.max(2,Math.min(10,orb.radius));
+  updateCameraOrbit();
+}
+
+function animate3D(){
+  animId=requestAnimationFrame(animate3D);
+  // Very slow auto-rotate when not dragging
+  if(!orb.dragging&&Math.abs(orb.velTheta)<0.001){
+    orb.theta+=0.003;
+    updateCameraOrbit();
+    updateDegDisplay();
   }
+  renderer.render(scene, camera);
 }
 
-// ===================== PHOTO SWIPER =====================
-function initPhotoSwiper() {
-  const swiper = document.getElementById('photos-swiper');
-  const dots = document.querySelectorAll('.media-dot');
-  swiper.addEventListener('scroll', () => {
-    const idx = Math.round(swiper.scrollLeft / swiper.offsetWidth);
-    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-  }, { passive: true });
-}
-
-// ===================== 360 VIEW =====================
-let angle360 = 0;
-let isDragging = false;
-let drag360StartX = 0;
-let drag360StartAngle = 0;
-let autoRotate360 = null;
-
-function init360() {
-  const el = document.getElementById('view-360');
-  el.addEventListener('mousedown', e => { isDragging = true; drag360StartX = e.clientX; drag360StartAngle = angle360; clearInterval(autoRotate360); });
-  el.addEventListener('touchstart', e => { isDragging = true; drag360StartX = e.touches[0].clientX; drag360StartAngle = angle360; clearInterval(autoRotate360); }, { passive: true });
-  window.addEventListener('mousemove', e => { if (!isDragging) return; rotate360By(e.clientX - drag360StartX); });
-  window.addEventListener('touchmove', e => { if (!isDragging) return; rotate360By(e.touches[0].clientX - drag360StartX); }, { passive: true });
-  window.addEventListener('mouseup', () => { isDragging = false; start360Auto(); });
-  window.addEventListener('touchend', () => { isDragging = false; start360Auto(); });
-  document.getElementById('rot-left').onclick = () => { angle360 = (angle360 - 30 + 360) % 360; update360(); };
-  document.getElementById('rot-right').onclick = () => { angle360 = (angle360 + 30) % 360; update360(); };
-}
-
-function rotate360By(dx) {
-  angle360 = (drag360StartAngle + dx * 0.6 + 360) % 360;
-  update360();
-}
-
-function update360() {
-  // Simulate 360 by applying CSS filter hue-rotate and slight scale variation
-  const img = document.getElementById('img-360');
-  const normalised = angle360 / 360;
-  // Slight brightness variation simulates 3D lighting
-  const brightness = 0.85 + 0.3 * Math.abs(Math.cos(normalised * Math.PI * 2));
-  const scaleX = 0.97 + 0.06 * Math.abs(Math.cos(normalised * Math.PI));
-  img.style.filter = `brightness(${brightness.toFixed(2)})`;
-  img.style.transform = `scaleX(${scaleX.toFixed(3)})`;
-  document.getElementById('deg-badge').textContent = Math.round(angle360) + '°';
-}
-
-function start360Auto() {
-  clearInterval(autoRotate360);
-  autoRotate360 = setInterval(() => {
-    angle360 = (angle360 + 0.5) % 360;
-    update360();
-  }, 30);
-}
-
-// ===================== VIEW SWITCHER =====================
-function switchView(view) {
-  currentView = view;
-  const swiper = document.getElementById('photos-swiper');
-  const v360 = document.getElementById('view-360');
-  const dots = document.getElementById('media-dots');
-  swiper.style.display = view === 'photos' ? 'flex' : 'none';
-  v360.classList.toggle('active', view === '360');
-  dots.style.display = view === 'photos' ? 'flex' : 'none';
-  document.getElementById('tab-photos').classList.toggle('active', view === 'photos');
-  document.getElementById('tab-360').classList.toggle('active', view === '360');
-  if (view === '360') {
-    document.getElementById('img-360').src = selectedItem.url;
-    start360Auto();
+// ════════════════════════════════════
+// VIEW SWITCHER
+// ════════════════════════════════════
+function setView(v){
+  document.getElementById('swiper').style.display=v==='photos'?'flex':'none';
+  const v3=document.getElementById('viewer3d');
+  v3.classList.toggle('show',v==='360');
+  document.getElementById('mdots').style.display=v==='photos'?'flex':'none';
+  document.getElementById('tph').classList.toggle('on',v==='photos');
+  document.getElementById('t360').classList.toggle('on',v==='360');
+  if(v==='360'){
+    setTimeout(()=>{
+      init3D();
+      updateCameraOrbit();
+    },50);
   } else {
-    clearInterval(autoRotate360);
+    // pause render when not visible
+    if(animId){ cancelAnimationFrame(animId); animId=null; }
   }
 }
 
-// ===================== SIZE / WISHLIST =====================
-function pickSize(el) {
-  document.querySelectorAll('.size-btn:not(.oos)').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+function pickSz(el){document.querySelectorAll('.sbtn:not(.oos)').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
+
+let wished=false;
+function toggleWish(){
+  wished=!wished;
+  const b=document.getElementById('wbtn');
+  b.textContent=wished?'♥':'♡'; b.classList.toggle('on',wished);
+  showToast(wished?'Added to wishlist ♥':'Removed from wishlist');
 }
 
-function toggleWishlist(btn) {
-  const active = btn.textContent === '♥';
-  btn.textContent = active ? '♡' : '♥';
-  btn.style.color = active ? '' : 'var(--red)';
-  btn.style.borderColor = active ? '' : 'var(--red)';
-  showToast(active ? 'Removed from wishlist' : 'Added to wishlist ♥');
+// ════════════════════════════════════
+// AR TRY-ON
+// ════════════════════════════════════
+function openAR(){
+  document.getElementById('arscr').classList.add('open');
+  document.body.style.overflow='hidden';
+  scanDone=false; smX=smY=smW=smH=0;
+  setARStat('Scanning body...');
+  document.getElementById('scanline').classList.remove('done');
+  document.getElementById('bguide').classList.remove('gone');
+  ['ctl','ctr','cbl','cbr'].forEach(id=>document.getElementById(id).classList.remove('go'));
+  startARCam();
 }
 
-// ===================== AR =====================
-function openAR() {
-  document.getElementById('ar-screen').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setARStatus('Starting camera...');
-  startARCamera();
-  preloadImg(selectedItem.url);
+function closeAR(){
+  document.getElementById('arscr').classList.remove('open');
+  document.body.style.overflow='';
+  scanDone=false;
+  if(mpCam){try{mpCam.stop();}catch(e){}mpCam=null;}
+  const v=document.getElementById('arv');
+  if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
+  document.getElementById('arc').getContext('2d').clearRect(0,0,9999,9999);
 }
 
-function closeAR() {
-  document.getElementById('ar-screen').classList.remove('open');
-  document.body.style.overflow = '';
-  scanComplete = false;
-  if (mpCamera) { try { mpCamera.stop(); } catch(e){} mpCamera = null; }
-  const video = document.getElementById('ar-video');
-  if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; }
-  const ctx = document.getElementById('ar-canvas').getContext('2d');
-  ctx.clearRect(0, 0, 9999, 9999);
+function setARStat(msg,type=''){
+  const el=document.getElementById('arstat');
+  el.textContent=msg; el.className='arstat'+(type?' '+type:'');
 }
 
-function setARStatus(msg, type) {
-  const el = document.getElementById('ar-status');
-  el.textContent = msg;
-  el.className = 'ar-status-pill' + (type ? ' ' + type : '');
+function startARCam(){
+  navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false})
+    .then(stream=>{
+      const v=document.getElementById('arv'); v.srcObject=stream;
+      v.onloadedmetadata=()=>{
+        setARStat('Stand back — show full body');
+        setTimeout(()=>{
+          scanDone=true;
+          document.getElementById('scanline').classList.add('done');
+          ['ctl','ctr','cbl','cbr'].forEach(id=>document.getElementById(id).classList.add('go'));
+        },2600);
+        startARPose(v);
+      };
+    })
+    .catch(()=>setARStat('Camera denied — allow in browser settings','err'));
 }
 
-function startARCamera() {
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
-    audio: false
-  }).then(stream => {
-    const video = document.getElementById('ar-video');
-    video.srcObject = stream;
-    video.onloadedmetadata = () => {
-      setARStatus('Stand back — full body visible');
-      setTimeout(() => {
-        scanComplete = true;
-        document.getElementById('ar-scan-line').classList.add('hidden');
-      }, 2500);
-      startARPose(video);
-    };
-  }).catch(() => {
-    setARStatus('Camera denied — allow access in settings', 'error');
-    document.getElementById('ar-scan-line').classList.add('hidden');
-  });
-}
+function flipCam(){facing=facing==='user'?'environment':'user';closeAR();setTimeout(openAR,400);}
 
-function flipCamera() {
-  facingMode = facingMode === 'user' ? 'environment' : 'user';
-  closeAR();
-  setTimeout(openAR, 300);
-}
-
-function startARPose(video) {
-  const canvas = document.getElementById('ar-canvas');
-  const pose = new Pose({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
-  pose.setOptions({ modelComplexity: 1, smoothLandmarks: true, minDetectionConfidence: 0.55, minTrackingConfidence: 0.55 });
-
-  pose.onResults(results => {
-    canvas.width = video.videoWidth || canvas.offsetWidth;
-    canvas.height = video.videoHeight || canvas.offsetHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function startARPose(video){
+  const canvas=document.getElementById('arc');
+  const pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
+  pose.setOptions({modelComplexity:1,smoothLandmarks:true,enableSegmentation:false,minDetectionConfidence:0.6,minTrackingConfidence:0.6});
+  pose.onResults(res=>{
+    canvas.width=video.videoWidth||canvas.offsetWidth;
+    canvas.height=video.videoHeight||canvas.offsetHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.save();
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-
-    if (results.poseLandmarks && results.poseLandmarks.length > 0 && scanComplete) {
-      document.getElementById('ar-body-guide').classList.add('hidden');
-      drawClothingAR(ctx, canvas.width, canvas.height, results.poseLandmarks);
-      setARStatus('✓ ' + selectedItem.name, 'tracked');
-    } else if (scanComplete) {
-      document.getElementById('ar-body-guide').classList.remove('hidden');
-      setARStatus('Move back — show full upper body');
+    ctx.translate(canvas.width,0); ctx.scale(-1,1);
+    ctx.drawImage(res.image,0,0,canvas.width,canvas.height);
+    if(res.poseLandmarks&&res.poseLandmarks.length>0&&scanDone){
+      document.getElementById('bguide').classList.add('gone');
+      drawClothingAR(ctx,canvas.width,canvas.height,res.poseLandmarks);
+      setARStat('✓ '+SEL.name,'ok');
+    } else if(scanDone){
+      document.getElementById('bguide').classList.remove('gone');
+      setARStat('Step back — show full upper body');
     }
     ctx.restore();
   });
-
-  mpCamera = new Camera(video, {
-    onFrame: async () => { if (mpCamera) await pose.send({ image: video }); },
-    width: 1280, height: 720
-  });
-  mpCamera.start();
+  mpCam=new Camera(video,{onFrame:async()=>{if(mpCam)await pose.send({image:video});},width:1280,height:720});
+  mpCam.start();
 }
 
-function getImg(url) {
-  if (!imgCache[url]) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = url;
-    imgCache[url] = img;
-  }
-  return imgCache[url];
+function drawClothingAR(ctx,w,h,lm){
+  const lS=lm[11],rS=lm[12],lH=lm[23],rH=lm[24];
+  if(!lS||!rS||!lH||!rH)return;
+  const opacity=document.getElementById('aropa').value/100;
+  const userScale=document.getElementById('arsc').value/100;
+  const lsx=(1-lS.x)*w, lsy=lS.y*h;
+  const rsx=(1-rS.x)*w, rsy=rS.y*h;
+  const cx=(lsx+rsx)/2, cy=(lsy+rsy)/2;
+  const shoulderW=Math.sqrt(Math.pow(rsx-lsx,2)+Math.pow(rsy-lsy,2));
+  const avgHY=(lH.y*h+rH.y*h)/2;
+  const torsoH=Math.sqrt(Math.pow((rH.x+lH.x)/2*w-cx,2)+Math.pow(avgHY-cy,2));
+  const angle=Math.atan2(rsy-lsy,rsx-lsx);
+  const tW=shoulderW*1.85*userScale;
+  const tH=torsoH*1.6*userScale;
+  const tX=cx-tW/2;
+  const tY=cy-tH*0.08;
+  smW=smW+(tW-smW)*SM; smH=smH+(tH-smH)*SM;
+  smX=smX+(tX-smX)*SM; smY=smY+(tY-smY)*SM;
+  smA=smA+(angle-smA)*SM;
+  const img=CACHE[SEL.url];
+  if(!img||!img.complete||!img.naturalWidth)return;
+  ctx.save();
+  ctx.globalAlpha=opacity;
+  ctx.translate(cx,cy);
+  ctx.rotate(smA);
+  ctx.drawImage(img,-smW/2,-smH*0.08,smW,smH);
+  ctx.globalAlpha=1;
+  ctx.restore();
 }
 
-function drawClothingAR(ctx, w, h, lm) {
-  const lS = lm[11], rS = lm[12], lH = lm[23], rH = lm[24];
-  if (!lS || !rS || !lH || !rH) return;
-
-  arOpacity = document.getElementById('ar-opacity').value / 100;
-
-  const lsx = (1 - lS.x) * w, lsy = lS.y * h;
-  const rsx = (1 - rS.x) * w, rsy = rS.y * h;
-  const avgShoulderY = (lsy + rsy) / 2;
-  const avgHipY = (lH.y * h + rH.y * h) / 2;
-
-  const shoulderW = Math.abs(rsx - lsx);
-  const torsoH = avgHipY - avgShoulderY;
-  const cx = (lsx + rsx) / 2;
-
-  const drawW = shoulderW * 1.8;
-  const drawH = torsoH * 1.6;
-  const drawX = cx - drawW / 2;
-  const drawY = avgShoulderY - drawH * 0.08;
-
-  const img = getImg(selectedItem.url);
-  if (img.complete && img.naturalWidth > 0) {
-    ctx.globalAlpha = arOpacity;
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-    ctx.globalAlpha = 1;
-  } else {
-    ctx.fillStyle = selectedItem.color;
-    ctx.globalAlpha = 0.6;
-    ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(drawX, drawY, drawW, drawH, 10) : ctx.rect(drawX, drawY, drawW, drawH);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-
-function snapPhoto() {
-  const canvas = document.getElementById('ar-canvas');
-  const link = document.createElement('a');
-  link.download = 'fitcheck-' + selectedItem.name.replace(/\s/g,'-').toLowerCase() + '.png';
-  link.href = canvas.toDataURL('image/png');
+function doSnap(){
+  const canvas=document.getElementById('arc');
+  const fl=document.getElementById('flash');
+  fl.classList.add('pop');
+  setTimeout(()=>fl.classList.remove('pop'),120);
+  const link=document.createElement('a');
+  link.download='fitcheck-'+SEL.name.replace(/\s+/g,'-').toLowerCase()+'.png';
+  link.href=canvas.toDataURL('image/png');
   link.click();
   showToast('Photo saved! 📸');
 }
 
-// ===================== TOAST =====================
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+let toastT;
+function showToast(msg){
+  const el=document.getElementById('toastEl');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600);
 }
 
 init();
 </script>
 </body>
 </html>
+HTMLEOF
+echo "Done"
