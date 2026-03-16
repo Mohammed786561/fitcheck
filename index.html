@@ -1,3 +1,4 @@
+cat << 'HTMLEOF' > /mnt/user-data/outputs/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,27 +19,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 .nib:hover{background:var(--g1)}
 .cdot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--blu);border-radius:50%;border:2px solid var(--wht)}
 .media-wrap{background:var(--g1);position:relative}
-.media-inner{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden}
+.media-inner{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#0a0a12}
 .swiper{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .swiper::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;height:100%;scroll-snap-align:start;overflow:hidden}
 .slide img{width:100%;height:100%;object-fit:cover;transition:transform .5s;display:block}
-.slide:hover img{transform:scale(1.04)}
-.viewer3d{display:none;position:absolute;inset:0;background:#0a0a14}
+.viewer3d{display:none;position:absolute;inset:0}
 .viewer3d.show{display:block}
-#threeCanvas{width:100%!important;height:100%!important;display:block;touch-action:none}
-.v3d-ui{position:absolute;inset:0;pointer-events:none;z-index:5}
-.v3d-deg{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:4px 13px;border-radius:100px;pointer-events:all}
-.v3d-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:500;padding:6px 16px;border-radius:100px;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .5s}
-.v3d-hint.gone{opacity:0}
-.v3d-reset{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;cursor:pointer;pointer-events:all}
-.v3d-zoom{position:absolute;right:12px;bottom:48px;display:flex;flex-direction:column;gap:6px;pointer-events:all}
-.v3d-zbtn{width:34px;height:34px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.v3d-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0a0a14;z-index:10}
-.v3d-loading.done{display:none}
-.v3d-spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--blu);border-radius:50%;animation:spin .8s linear infinite}
+#tc{width:100%!important;height:100%!important;display:block;touch-action:none;outline:none}
+.v3ui{position:absolute;inset:0;pointer-events:none;z-index:5}
+.v3deg{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:4px 13px;border-radius:100px;pointer-events:all;letter-spacing:.04em}
+.v3hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:500;padding:6px 16px;border-radius:100px;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .5s;pointer-events:none}
+.v3hint.gone{opacity:0}
+.v3reset{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:600;padding:6px 13px;border-radius:100px;cursor:pointer;pointer-events:all;transition:background .15s}
+.v3reset:hover{background:rgba(255,255,255,.25)}
+.v3zoom{position:absolute;right:12px;bottom:48px;display:flex;flex-direction:column;gap:6px;pointer-events:all}
+.v3zb{width:34px;height:34px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.v3zb:hover{background:rgba(255,255,255,.25)}
+.v3load{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0a0a12;z-index:10}
+.v3load.done{display:none}
+.v3spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--blu);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.v3d-load-txt{color:rgba(255,255,255,.6);font-size:12px;font-weight:500}
+.v3ltxt{color:rgba(255,255,255,.55);font-size:12px;font-weight:500;letter-spacing:.03em}
 .mdots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;pointer-events:none}
 .mdot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.2);transition:all .25s}
 .mdot.on{background:var(--blk);width:18px;border-radius:3px}
@@ -53,53 +55,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 .ptitle{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;line-height:1.18;margin-bottom:8px}
 .stars{color:#f5a623;font-size:12px;letter-spacing:1px}
 .rrow{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.rnum{font-size:13px;font-weight:600}
-.rcnt{font-size:12px;color:var(--g4)}
-.rdiv{width:1px;height:11px;background:var(--g2)}
-.rlink{font-size:12px;color:var(--blu);cursor:pointer}
+.rnum{font-size:13px;font-weight:600}.rcnt{font-size:12px;color:var(--g4)}.rdiv{width:1px;height:11px;background:var(--g2)}.rlink{font-size:12px;color:var(--blu);cursor:pointer}
 .prow{display:flex;align-items:baseline;gap:10px;margin-bottom:5px;flex-wrap:wrap}
-.pmain{font-size:28px;font-weight:600;letter-spacing:-.02em}
-.pold{font-size:15px;color:var(--g4);text-decoration:line-through}
-.poff{font-size:12px;font-weight:700;color:var(--grn);background:#e8faf2;padding:3px 9px;border-radius:100px}
+.pmain{font-size:28px;font-weight:600;letter-spacing:-.02em}.pold{font-size:15px;color:var(--g4);text-decoration:line-through}.poff{font-size:12px;font-weight:700;color:var(--grn);background:#e8faf2;padding:3px 9px;border-radius:100px}
 .orow{font-size:12px;color:var(--grn);font-weight:500;margin-bottom:4px}
 .sec{padding:13px 1rem;background:#fff;border-top:6px solid var(--g1)}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.st{font-size:13px;font-weight:500}
-.sl{font-size:12px;color:var(--blu);cursor:pointer}
+.st{font-size:13px;font-weight:500}.sl{font-size:12px;color:var(--blu);cursor:pointer}
 .crow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
 .csw{width:27px;height:27px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .2s;flex-shrink:0;position:relative}
 .csw.on{border-color:var(--blk);transform:scale(1.16)}
 .csw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .sgrid{display:flex;gap:8px;flex-wrap:wrap}
 .sbtn{min-width:50px;height:42px;border:1.5px solid var(--g2);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 14px;transition:all .15s;color:var(--blk);font-family:inherit}
-.sbtn:hover:not(.oos){border-color:var(--blk)}
-.sbtn.on{border-color:var(--blk);background:var(--blk);color:#fff}
-.sbtn.oos{color:var(--g4);text-decoration:line-through;cursor:not-allowed;opacity:.55}
+.sbtn:hover:not(.oos){border-color:var(--blk)}.sbtn.on{border-color:var(--blk);background:var(--blk);color:#fff}.sbtn.oos{color:var(--g4);text-decoration:line-through;cursor:not-allowed;opacity:.55}
 .feats{padding:13px 1rem;background:#fff;border-top:6px solid var(--g1);display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .feat{display:flex;align-items:flex-start;gap:8px}
 .fic{width:33px;height:33px;background:var(--g1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.ftx{font-size:11px;color:var(--g6);line-height:1.45}
-.ftx strong{display:block;color:var(--blk);font-size:12px;font-weight:500;margin-bottom:1px}
+.ftx{font-size:11px;color:var(--g6);line-height:1.45}.ftx strong{display:block;color:var(--blk);font-size:12px;font-weight:500;margin-bottom:1px}
 .related{padding:13px 1rem 80px;background:#fff;border-top:6px solid var(--g1)}
 .rscroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .rscroll::-webkit-scrollbar{display:none}
 .rcard{flex:0 0 128px;cursor:pointer;border-radius:12px;overflow:hidden;border:1.5px solid var(--g2);background:#fff;transition:all .18s}
-.rcard:hover{border-color:var(--blk);transform:translateY(-2px)}
-.rcard.on{border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,82,255,.18)}
+.rcard:hover{border-color:var(--blk);transform:translateY(-2px)}.rcard.on{border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,82,255,.18)}
 .rcimg{width:100%;aspect-ratio:3/4;overflow:hidden;background:var(--g1)}
 .rcimg img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
 .rcard:hover .rcimg img{transform:scale(1.07)}
-.rcinfo{padding:7px 9px}
-.rcname{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.rcprice{font-size:11px;color:var(--g6)}
+.rcinfo{padding:7px 9px}.rcname{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}.rcprice{font-size:11px;color:var(--g6)}
 .bbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,248,.97);backdrop-filter:blur(24px);border-top:1px solid var(--g2);padding:10px 1rem 18px;display:flex;gap:10px;z-index:60}
 .bwish{width:48px;height:48px;border:1.5px solid var(--g2);border-radius:8px;background:#fff;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
 .bwish.on{border-color:var(--red);color:var(--red)}
 .bcart{flex:1;height:48px;background:var(--blk);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
 .bcart:hover{background:#222}
 .barb{width:48px;height:48px;background:var(--blu);border:none;border-radius:8px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
-.barb:hover{background:var(--blu2)}
-.barb svg{width:20px;height:20px}
+.barb:hover{background:var(--blu2)}.barb svg{width:20px;height:20px}
+/* AR */
 .arscr{position:fixed;inset:0;background:#000;z-index:999;display:none;flex-direction:column;max-width:430px;margin:0 auto}
 .arscr.open{display:flex;animation:fuIn .25s ease}
 @keyframes fuIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
@@ -140,7 +130,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 .arsnap{width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid rgba(255,255,255,.3);cursor:pointer;flex-shrink:0;transition:transform .12s;position:relative}
 .arsnap::after{content:'';position:absolute;inset:5px;border-radius:50%;border:2px solid rgba(0,0,0,.1)}
 .arsnap:active{transform:scale(.88)}
-.arflip{width:46px;height:46px;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:#fff;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.arflip{width:46px;height:46px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:#fff;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .flash{position:fixed;inset:0;background:#fff;z-index:9999;opacity:0;pointer-events:none;transition:opacity .06s}
 .flash.pop{opacity:1}
 .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(8,8,8,.92);color:#fff;font-size:13px;font-weight:500;padding:10px 22px;border-radius:100px;z-index:9999;opacity:0;transition:all .28s;white-space:nowrap;pointer-events:none;max-width:300px;text-align:center}
@@ -148,7 +138,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 </style>
 </head>
 <body>
-
 <nav class="nav">
   <button class="nav-back">←</button>
   <div class="nav-logo">Fit<span>Check</span></div>
@@ -166,22 +155,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
       <div class="slide"><img id="s2" src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90" alt=""/></div>
     </div>
 
+    <!-- 3D VIEWER — just the clothing floating in space -->
     <div class="viewer3d" id="viewer3d">
-      <canvas id="threeCanvas"></canvas>
-      <div class="v3d-loading" id="v3dLoad">
-        <div class="v3d-spinner"></div>
-        <div class="v3d-load-txt">Building 3D model...</div>
+      <canvas id="tc"></canvas>
+      <div class="v3load" id="v3load">
+        <div class="v3spin"></div>
+        <div class="v3ltxt">Loading 3D view...</div>
       </div>
-      <div class="v3d-ui">
-        <button class="v3d-reset" onclick="reset3D()">⟳ Reset</button>
-        <div class="v3d-deg" id="v3dDeg">0°</div>
-        <div class="v3d-hint" id="v3dHint">
+      <div class="v3ui">
+        <button class="v3reset" onclick="reset3D()">⟳ Reset</button>
+        <div class="v3deg" id="v3deg">0°</div>
+        <div class="v3hint" id="v3hint">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3"/></svg>
           Drag to rotate · Pinch to zoom
         </div>
-        <div class="v3d-zoom">
-          <button class="v3d-zbtn" onclick="zoom3D(1.2)">+</button>
-          <button class="v3d-zbtn" onclick="zoom3D(0.8)">−</button>
+        <div class="v3zoom">
+          <button class="v3zb" onclick="z3(1.15)">+</button>
+          <button class="v3zb" onclick="z3(0.87)">−</button>
         </div>
       </div>
     </div>
@@ -192,13 +182,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
   </div>
 
   <div class="tabs">
-    <div class="tab on" id="tph" onclick="setView('photos')">
+    <div class="tab on" id="tph" onclick="setV('photos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Photos
     </div>
-    <div class="tab" id="t360" onclick="setView('360')">
+    <div class="tab" id="t360" onclick="setV('360')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="10"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3c-2.5 3-4 6-4 9s1.5 6 4 9M12 3c2.5 3 4 6 4 9s-1.5 6-4 9"/></svg>360° View
     </div>
-    <div class="tab ar-tab" id="tar" onclick="openAR()">
+    <div class="tab ar-tab" onclick="openAR()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>AR Try On
     </div>
   </div>
@@ -207,73 +197,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 <div class="pinfo">
   <div class="brand">FitCheck Collection</div>
   <div class="ptitle" id="ptitle">Black Premium Hoodie</div>
-  <div class="rrow">
-    <span class="stars">★★★★★</span><span class="rnum">4.9</span>
-    <div class="rdiv"></div><span class="rcnt">3,241 reviews</span>
-    <div class="rdiv"></div><span class="rlink">See all →</span>
-  </div>
-  <div class="prow">
-    <span class="pmain" id="pprice">$59.99</span>
-    <span class="pold">$89.99</span>
-    <span class="poff">33% OFF</span>
-  </div>
+  <div class="rrow"><span class="stars">★★★★★</span><span class="rnum">4.9</span><div class="rdiv"></div><span class="rcnt">3,241 reviews</span><div class="rdiv"></div><span class="rlink">See all →</span></div>
+  <div class="prow"><span class="pmain" id="pprice">$59.99</span><span class="pold">$89.99</span><span class="poff">33% OFF</span></div>
   <div class="orow">✦ Buy 1 Get 1 Free · Free delivery over $50 · 30-day returns</div>
 </div>
-
-<div class="sec">
-  <div class="sh"><div class="st">Colour — <span id="clbl" style="color:var(--g6);font-weight:400">Jet Black</span></div></div>
-  <div class="crow" id="crow"></div>
-</div>
-
+<div class="sec"><div class="sh"><div class="st">Colour — <span id="clbl" style="color:var(--g6);font-weight:400">Jet Black</span></div></div><div class="crow" id="crow"></div></div>
 <div class="sec">
   <div class="sh"><div class="st">Size</div><div class="sl">Size guide →</div></div>
-  <div class="sgrid">
-    <div class="sbtn oos">XS</div>
-    <div class="sbtn" onclick="pickSz(this)">S</div>
-    <div class="sbtn on" onclick="pickSz(this)">M</div>
-    <div class="sbtn" onclick="pickSz(this)">L</div>
-    <div class="sbtn" onclick="pickSz(this)">XL</div>
-    <div class="sbtn" onclick="pickSz(this)">XXL</div>
-  </div>
+  <div class="sgrid"><div class="sbtn oos">XS</div><div class="sbtn" onclick="pickSz(this)">S</div><div class="sbtn on" onclick="pickSz(this)">M</div><div class="sbtn" onclick="pickSz(this)">L</div><div class="sbtn" onclick="pickSz(this)">XL</div><div class="sbtn" onclick="pickSz(this)">XXL</div></div>
 </div>
-
 <div class="feats">
   <div class="feat"><div class="fic">🚚</div><div class="ftx"><strong>Free Delivery</strong>Orders over $50</div></div>
   <div class="feat"><div class="fic">↩️</div><div class="ftx"><strong>30-Day Returns</strong>Hassle-free</div></div>
   <div class="feat"><div class="fic">🪡</div><div class="ftx"><strong>Premium Cotton</strong>400 GSM</div></div>
   <div class="feat"><div class="fic">🔒</div><div class="ftx"><strong>Secure Pay</strong>256-bit SSL</div></div>
 </div>
-
-<div class="related sec">
-  <div class="sh"><div class="st">More to try on</div><div class="sl">See all →</div></div>
-  <div class="rscroll" id="rscroll"></div>
-</div>
+<div class="related sec"><div class="sh"><div class="st">More to try on</div><div class="sl">See all →</div></div><div class="rscroll" id="rscroll"></div></div>
 
 <div class="bbar">
   <button class="bwish" id="wbtn" onclick="toggleWish()">♡</button>
   <button class="bcart" onclick="showToast('Added to cart! 🛒')">Add to Cart</button>
-  <button class="barb" onclick="openAR()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-  </button>
+  <button class="barb" onclick="openAR()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></button>
 </div>
 
-<!-- AR SCREEN -->
+<!-- AR -->
 <div class="arscr" id="arscr">
   <div class="arcam">
     <video id="arv" autoplay playsinline muted></video>
     <canvas id="arc"></canvas>
-    <div class="corner tl" id="ctl"></div>
-    <div class="corner tr" id="ctr"></div>
-    <div class="corner bl" id="cbl"></div>
-    <div class="corner br" id="cbr"></div>
+    <div class="corner tl" id="ctl"></div><div class="corner tr" id="ctr"></div>
+    <div class="corner bl" id="cbl"></div><div class="corner br" id="cbr"></div>
     <div class="scanline" id="scanline"></div>
     <div class="bguide" id="bguide">
       <svg width="140" height="280" viewBox="0 0 140 280" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5">
         <ellipse cx="70" cy="32" rx="25" ry="29"/>
-        <line x1="70" y1="61" x2="70" y2="165"/>
-        <line x1="70" y1="88" x2="18" y2="140"/>
-        <line x1="70" y1="88" x2="122" y2="140"/>
-        <line x1="70" y1="165" x2="42" y2="260"/>
+        <line x1="70" y1="61" x2="70" y2="165"/><line x1="70" y1="88" x2="18" y2="140"/>
+        <line x1="70" y1="88" x2="122" y2="140"/><line x1="70" y1="165" x2="42" y2="260"/>
         <line x1="70" y1="165" x2="98" y2="260"/>
         <line x1="18" y1="80" x2="122" y2="80" stroke-dasharray="4 4" stroke-opacity=".3"/>
         <line x1="36" y1="155" x2="104" y2="155" stroke-dasharray="4 4" stroke-opacity=".3"/>
@@ -307,12 +266,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script>
 const ITEMS=[
-  {id:1,name:'Black Premium Hoodie',price:'$59.99',url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90',color:'#1a1a1a',hex:0x222222,cname:'Jet Black'},
-  {id:2,name:'White Essential Tee',price:'$29.99',url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90',color:'#f0f0ee',hex:0xeeeeee,cname:'Pure White'},
-  {id:3,name:'Indigo Denim Jacket',price:'$89.99',url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90',color:'#3a5a8a',hex:0x3a5a8a,cname:'Indigo Blue'},
-  {id:4,name:'Camel Trench Coat',price:'$129.99',url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90',color:'#c4a57a',hex:0xc4a57a,cname:'Camel'},
-  {id:5,name:'Ash Grey Sweatshirt',price:'$49.99',url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90',color:'#8a8a86',hex:0x8a8a86,cname:'Ash Grey'},
-  {id:6,name:'Navy Polo',price:'$39.99',url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90',color:'#1a2f5a',hex:0x1a2f5a,cname:'Navy'},
+  {id:1,name:'Black Premium Hoodie',price:'$59.99',url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90',color:'#1a1a1a',hex:0x222222,cname:'Jet Black',type:'hoodie'},
+  {id:2,name:'White Essential Tee',price:'$29.99',url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90',color:'#f0f0ee',hex:0xeeeeee,cname:'Pure White',type:'tshirt'},
+  {id:3,name:'Indigo Denim Jacket',price:'$89.99',url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90',color:'#3a5a8a',hex:0x3a5a8a,cname:'Indigo Blue',type:'jacket'},
+  {id:4,name:'Camel Trench Coat',price:'$129.99',url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90',color:'#c4a57a',hex:0xc4a57a,cname:'Camel',type:'coat'},
+  {id:5,name:'Ash Grey Sweatshirt',price:'$49.99',url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90',color:'#8a8a86',hex:0x8a8a86,cname:'Ash Grey',type:'hoodie'},
+  {id:6,name:'Navy Polo',price:'$39.99',url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90',color:'#1a2f5a',hex:0x1a2f5a,cname:'Navy',type:'tshirt'},
 ];
 
 let SEL=ITEMS[0],mpCam=null,facing='user',scanDone=false;
@@ -322,8 +281,9 @@ const SM=0.18;
 
 // Three.js
 let renderer,scene,camera,animId,threeReady=false;
-let bodyGroup,clothGroup;
-let orb={theta:0.3,phi:1.1,radius:3.8,dragging:false,lastX:0,lastY:0,velT:0,velP:0,target:new THREE.Vector3(0,1.1,0),pinching:false,pinchDist:0};
+let clothGroup=null;
+const orb={theta:0.4,phi:1.3,r:2.8,drag:false,lx:0,ly:0,vt:0,vp:0,pinch:false,pd:0};
+const TARGET=new THREE.Vector3(0,0,0);
 
 function init(){
   renderRelated();renderThumbs();renderColours();
@@ -339,9 +299,9 @@ function selectItem(item){
   document.getElementById('ptitle').textContent=item.name;
   document.getElementById('pprice').textContent=item.price;
   document.getElementById('arname').textContent=item.name;
-  document.querySelectorAll('.slide img').forEach(img=>img.src=item.url);
+  document.querySelectorAll('.slide img').forEach(i=>i.src=item.url);
   smX=smY=smW=smH=0;
-  if(threeReady)updateCloth();
+  if(threeReady)buildCloth();
   renderRelated();renderThumbs();renderColours();
   preload(item.url);
 }
@@ -386,319 +346,313 @@ function initSwiper(){
   },{passive:true});
 }
 
-// ══════════════════════════════════════
-// THREE.JS — proper human figure
-// ══════════════════════════════════════
+// ════════════════════════════════════
+// THREE.JS — JUST THE CLOTHING in 3D
+// No person, no mannequin
+// Looks like Nike shoe viewer
+// ════════════════════════════════════
 function init3D(){
   if(threeReady)return;
-  const container=document.getElementById('viewer3d');
-  const canvas=document.getElementById('threeCanvas');
-  const W=container.offsetWidth,H=container.offsetHeight;
+  const cont=document.getElementById('viewer3d');
+  const canvas=document.getElementById('tc');
+  const W=cont.offsetWidth,H=cont.offsetHeight;
 
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
   renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x0a0a12,1);
 
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x0d0d1a);
-  scene.fog=new THREE.Fog(0x0d0d1a,8,20);
 
-  camera=new THREE.PerspectiveCamera(42,W/H,0.1,50);
-  updateCameraOrbit();
+  // Elegant dark background with subtle gradient feel
+  scene.background=new THREE.Color(0x0a0a12);
+  scene.fog=new THREE.FogExp2(0x0a0a12,0.12);
 
-  // Lighting — studio style
-  scene.add(new THREE.AmbientLight(0xffffff,0.5));
-  const key=new THREE.DirectionalLight(0xfff5e0,1.4);
-  key.position.set(2,5,3);key.castShadow=true;
-  key.shadow.mapSize.set(1024,1024);scene.add(key);
-  const fill=new THREE.DirectionalLight(0xd0e8ff,0.5);
-  fill.position.set(-3,2,-1);scene.add(fill);
-  const rim=new THREE.DirectionalLight(0xffffff,0.6);
-  rim.position.set(0,4,-4);scene.add(rim);
-  const under=new THREE.PointLight(0x3344ff,0.3,8);
-  under.position.set(0,-1,1);scene.add(under);
+  camera=new THREE.PerspectiveCamera(38,W/H,0.1,50);
+  updateCam();
 
-  // Floor with reflection feel
-  const floorGeo=new THREE.CircleGeometry(3,64);
-  const floorMat=new THREE.MeshLambertMaterial({color:0x111122});
+  // Studio lighting — like a fashion photo shoot
+  const ambient=new THREE.AmbientLight(0xffffff,0.5);
+  scene.add(ambient);
+
+  // Main key light — warm from top left
+  const key=new THREE.DirectionalLight(0xfff8f0,2.0);
+  key.position.set(-2,4,3);
+  key.castShadow=true;
+  key.shadow.mapSize.set(2048,2048);
+  scene.add(key);
+
+  // Fill light — cool from right
+  const fill=new THREE.DirectionalLight(0xd0e8ff,0.8);
+  fill.position.set(3,1,-1);
+  scene.add(fill);
+
+  // Rim light — dramatic from behind
+  const rim=new THREE.DirectionalLight(0xffffff,1.0);
+  rim.position.set(0,2,-4);
+  scene.add(rim);
+
+  // Subtle point light below — bounce light
+  const bounce=new THREE.PointLight(0x4466ff,0.4,6);
+  bounce.position.set(0,-1.5,1);
+  scene.add(bounce);
+
+  // Subtle floor reflection plane
+  const floorGeo=new THREE.PlaneGeometry(6,6);
+  const floorMat=new THREE.MeshLambertMaterial({
+    color:0x111122,transparent:true,opacity:0.6
+  });
   const floor=new THREE.Mesh(floorGeo,floorMat);
-  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;
+  floor.rotation.x=-Math.PI/2;
+  floor.position.y=-1.1;
+  floor.receiveShadow=true;
   scene.add(floor);
 
-  // Soft shadow circle under feet
-  const shadowGeo=new THREE.CircleGeometry(0.45,32);
-  const shadowMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.35});
+  // Soft shadow disc under clothing
+  const shadowGeo=new THREE.EllipseGeometry(0.5,0.25,32);
+  const shadowMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.4,side:THREE.DoubleSide});
   const shadowDisc=new THREE.Mesh(shadowGeo,shadowMat);
-  shadowDisc.rotation.x=-Math.PI/2;shadowDisc.position.y=0.001;
+  shadowDisc.rotation.x=-Math.PI/2;
+  shadowDisc.position.y=-1.09;
   scene.add(shadowDisc);
 
-  buildFigure();
+  // Build the clothing
+  buildCloth();
+
+  // Orbit controls
   setupOrbit(canvas);
+
   threeReady=true;
-  document.getElementById('v3dLoad').classList.add('done');
+  document.getElementById('v3load').classList.add('done');
   animate3D();
-  setTimeout(()=>document.getElementById('v3dHint').classList.add('gone'),4000);
+  setTimeout(()=>document.getElementById('v3hint').classList.add('gone'),4000);
 
   window.addEventListener('resize',()=>{
-    const W2=container.offsetWidth,H2=container.offsetHeight;
+    if(!renderer)return;
+    const W2=cont.offsetWidth,H2=cont.offsetHeight;
     renderer.setSize(W2,H2);camera.aspect=W2/H2;camera.updateProjectionMatrix();
   });
 }
 
-// ── Build a proper human figure with clothing ──
-function buildFigure(){
-  const skinColor=0xd4a574;
-  const hairColor=0x2c1810;
-  const shoeColor=0x1a1a1a;
-
-  bodyGroup=new THREE.Group();
+// ── BUILD CLOTHING — proper 3D garment shape ──
+function buildCloth(){
+  // Remove old
+  if(clothGroup){scene.remove(clothGroup);}
   clothGroup=new THREE.Group();
 
-  const skin=new THREE.MeshLambertMaterial({color:skinColor});
-  const hair=new THREE.MeshLambertMaterial({color:hairColor});
-  const shoe=new THREE.MeshLambertMaterial({color:shoeColor});
-  const pant=new THREE.MeshLambertMaterial({color:0x2a2a3a});
-
-  // ── HEAD ──
-  const headGeo=new THREE.SphereGeometry(0.18,24,18);
-  const head=new THREE.Mesh(headGeo,skin);
-  head.position.set(0,2.08,0);head.castShadow=true;
-  bodyGroup.add(head);
-
-  // Hair on top of head
-  const hairGeo=new THREE.SphereGeometry(0.185,24,12,0,Math.PI*2,0,Math.PI*0.5);
-  const hairMesh=new THREE.Mesh(hairGeo,hair);
-  hairMesh.position.set(0,2.08,0);
-  bodyGroup.add(hairMesh);
-
-  // Face details — nose
-  const noseGeo=new THREE.SphereGeometry(0.025,8,6);
-  const nose=new THREE.Mesh(noseGeo,skin);
-  nose.position.set(0,2.04,0.175);
-  bodyGroup.add(nose);
-
-  // ── NECK ──
-  const neckGeo=new THREE.CylinderGeometry(0.065,0.075,0.15,14);
-  const neck=new THREE.Mesh(neckGeo,skin);
-  neck.position.set(0,1.895,0);neck.castShadow=true;
-  bodyGroup.add(neck);
-
-  // ── HANDS (visible at end of sleeves) ──
-  const handGeo=new THREE.SphereGeometry(0.06,10,8);
-  const lHand=new THREE.Mesh(handGeo,skin);
-  lHand.position.set(-0.58,1.36,0.02);lHand.scale.set(1,1.2,0.8);
-  bodyGroup.add(lHand);
-  const rHand=new THREE.Mesh(handGeo,skin);
-  rHand.position.set(0.58,1.36,0.02);rHand.scale.set(1,1.2,0.8);
-  bodyGroup.add(rHand);
-
-  // ── LEGS (trousers) ──
-  const legGeo=new THREE.CylinderGeometry(0.1,0.085,0.7,14);
-  const lLeg=new THREE.Mesh(legGeo,pant);
-  lLeg.position.set(-0.14,0.72,0);lLeg.castShadow=true;
-  bodyGroup.add(lLeg);
-  const rLeg=new THREE.Mesh(legGeo,pant);
-  rLeg.position.set(0.14,0.72,0);rLeg.castShadow=true;
-  bodyGroup.add(rLeg);
-
-  // Lower legs
-  const lLegLo=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.075,0.6,14),pant);
-  lLegLo.position.set(-0.14,0.26,0);lLegLo.castShadow=true;
-  bodyGroup.add(lLegLo);
-  const rLegLo=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.075,0.6,14),pant);
-  rLegLo.position.set(0.14,0.26,0);rLegLo.castShadow=true;
-  bodyGroup.add(rLegLo);
-
-  // ── SHOES ──
-  const shoeGeo=new THREE.BoxGeometry(0.16,0.07,0.28);
-  const lShoe=new THREE.Mesh(shoeGeo,shoe);
-  lShoe.position.set(-0.14,0.035,0.05);lShoe.castShadow=true;
-  bodyGroup.add(lShoe);
-  const rShoe=new THREE.Mesh(shoeGeo,shoe);
-  rShoe.position.set(0.14,0.035,0.05);rShoe.castShadow=true;
-  bodyGroup.add(rShoe);
-
-  // Shoe sole highlight
-  const soleMat=new THREE.MeshLambertMaterial({color:0xffffff});
-  const lSole=new THREE.Mesh(new THREE.BoxGeometry(0.155,0.012,0.275),soleMat);
-  lSole.position.set(-0.14,0.002,0.05);bodyGroup.add(lSole);
-  const rSole=new THREE.Mesh(new THREE.BoxGeometry(0.155,0.012,0.275),soleMat);
-  rSole.position.set(0.14,0.002,0.05);bodyGroup.add(rSole);
-
-  scene.add(bodyGroup);
-
-  // ── CLOTHING GROUP ──
-  buildClothGroup();
-  scene.add(clothGroup);
-}
-
-function buildClothGroup(){
-  // Remove old clothing
-  while(clothGroup.children.length)clothGroup.remove(clothGroup.children[0]);
-
-  const c=new THREE.Color(SEL.hex);
-  const clothMat=new THREE.MeshLambertMaterial({color:c});
-
-  // Use texture from URL for front face of torso
+  const type=SEL.type||'hoodie';
+  const col=new THREE.Color(SEL.hex);
+  const darkCol=new THREE.Color(SEL.hex).multiplyScalar(0.7);
   const loader=new THREE.TextureLoader();
   loader.crossOrigin='anonymous';
 
-  // Torso — shaped body, not a flat box
-  // Use a lathe geometry for organic torso shape
-  const torsoPoints=[
-    new THREE.Vector2(0.0,0.0),   // waist centre
-    new THREE.Vector2(0.2,0.0),   // waist
-    new THREE.Vector2(0.21,0.12),
-    new THREE.Vector2(0.22,0.25),
-    new THREE.Vector2(0.24,0.4),  // chest
-    new THREE.Vector2(0.22,0.52),
-    new THREE.Vector2(0.18,0.6),  // shoulder
-    new THREE.Vector2(0.0,0.62),
-  ];
-  const torsoGeo=new THREE.LatheGeometry(torsoPoints,20);
-  const torsoMat=new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide});
+  // ── Materials ──
+  const mainMat=new THREE.MeshLambertMaterial({color:col,side:THREE.DoubleSide});
+  const darkMat=new THREE.MeshLambertMaterial({color:darkCol,side:THREE.DoubleSide});
 
-  // Load texture and apply
+  // Apply photo texture to front panel
   loader.load(SEL.url,(tex)=>{
     tex.encoding=THREE.sRGBEncoding;
-    torsoMat.map=tex;
-    torsoMat.needsUpdate=true;
+    // Front panel only gets the texture
+    if(clothGroup.children[0]){
+      clothGroup.children[0].material=new THREE.MeshLambertMaterial({map:tex,side:THREE.FrontSide});
+    }
   });
 
-  const torso=new THREE.Mesh(torsoGeo,torsoMat);
-  torso.position.set(0,1.38,0);
-  torso.rotation.x=Math.PI; // flip so it opens upward
-  torso.castShadow=true;
-  clothGroup.add(torso);
+  if(type==='hoodie'||type==='tshirt'||type==='jacket'||type==='coat'){
+    buildShirt(clothGroup,mainMat,darkMat,type);
+  }
 
-  // Back of torso (solid colour)
-  const backTorso=new THREE.Mesh(torsoGeo,clothMat);
-  backTorso.position.set(0,1.38,0);
-  backTorso.rotation.x=Math.PI;
-  backTorso.rotation.y=Math.PI;
-  clothGroup.add(backTorso);
+  // Float it nicely in center
+  clothGroup.position.set(0,0,0);
+  scene.add(clothGroup);
 
-  // Sleeves — tapered cylinders
-  const lSleeveGeo=new THREE.CylinderGeometry(0.075,0.062,0.56,12);
-  const lSleeve=new THREE.Mesh(lSleeveGeo,clothMat);
-  lSleeve.position.set(-0.33,1.63,0);
-  lSleeve.rotation.z=0.28;
-  lSleeve.castShadow=true;
-  clothGroup.add(lSleeve);
-
-  const rSleeve=new THREE.Mesh(lSleeveGeo,clothMat);
-  rSleeve.position.set(0.33,1.63,0);
-  rSleeve.rotation.z=-0.28;
-  rSleeve.castShadow=true;
-  clothGroup.add(rSleeve);
-
-  // Shoulder caps — smooth transition from torso to sleeves
-  const capGeo=new THREE.SphereGeometry(0.1,12,8,0,Math.PI*2,0,Math.PI*0.6);
-  const lCap=new THREE.Mesh(capGeo,clothMat);
-  lCap.position.set(-0.22,1.92,0);lCap.rotation.z=0.3;
-  clothGroup.add(lCap);
-  const rCap=new THREE.Mesh(capGeo,clothMat);
-  rCap.position.set(0.22,1.92,0);rCap.rotation.z=-0.3;
-  clothGroup.add(rCap);
-
-  // Collar / neckline
-  const collarGeo=new THREE.TorusGeometry(0.1,0.028,10,20);
-  const collarMat=new THREE.MeshLambertMaterial({color:new THREE.Color(SEL.hex).multiplyScalar(0.8)});
-  const collar=new THREE.Mesh(collarGeo,collarMat);
-  collar.position.set(0,1.98,0);collar.rotation.x=Math.PI/2;
-  clothGroup.add(collar);
-
-  // Bottom hem
-  const hemGeo=new THREE.TorusGeometry(0.205,0.018,8,24);
-  const hem=new THREE.Mesh(hemGeo,collarMat);
-  hem.position.set(0,1.35,0);hem.rotation.x=Math.PI/2;
-  clothGroup.add(hem);
-
-  // Sleeve cuffs
-  const cuffGeo=new THREE.TorusGeometry(0.065,0.016,8,16);
-  const lCuff=new THREE.Mesh(cuffGeo,collarMat);
-  lCuff.position.set(-0.56,1.36,0.02);lCuff.rotation.z=0.28;
-  clothGroup.add(lCuff);
-  const rCuff=new THREE.Mesh(cuffGeo,collarMat);
-  rCuff.position.set(0.56,1.36,0.02);rCuff.rotation.z=-0.28;
-  clothGroup.add(rCuff);
+  // Small floating animation
+  floatAnim();
 }
 
-function updateCloth(){
-  if(clothGroup)buildClothGroup();
+function buildShirt(group,mainMat,darkMat,type){
+  const isLong=(type==='coat'||type==='jacket');
+  const bodyH=isLong?2.2:1.4;
+  const bodyW=1.0;
+  const bodyD=0.35;
+
+  // ── FRONT PANEL (gets the texture) ──
+  const frontGeo=new THREE.PlaneGeometry(bodyW,bodyH,2,4);
+  const front=new THREE.Mesh(frontGeo,mainMat.clone());
+  front.position.set(0,0,bodyD/2+0.001);
+  group.add(front);
+
+  // ── BACK PANEL ──
+  const backGeo=new THREE.PlaneGeometry(bodyW,bodyH,2,4);
+  const back=new THREE.Mesh(backGeo,mainMat);
+  back.position.set(0,0,-bodyD/2);
+  back.rotation.y=Math.PI;
+  group.add(back);
+
+  // ── SIDES — curved for volume ──
+  const sideGeo=new THREE.PlaneGeometry(bodyD,bodyH,1,4);
+  const lSide=new THREE.Mesh(sideGeo,darkMat);
+  lSide.position.set(-bodyW/2,0,0);lSide.rotation.y=-Math.PI/2;
+  group.add(lSide);
+  const rSide=new THREE.Mesh(sideGeo,darkMat);
+  rSide.position.set(bodyW/2,0,0);rSide.rotation.y=Math.PI/2;
+  group.add(rSide);
+
+  // ── SHOULDERS ──
+  const shoulderGeo=new THREE.PlaneGeometry(bodyW,bodyD,2,1);
+  const topShould=new THREE.Mesh(shoulderGeo,darkMat);
+  topShould.position.set(0,bodyH/2,0);topShould.rotation.x=-Math.PI/2;
+  group.add(topShould);
+
+  // ── SLEEVES ──
+  const sleeveLen=type==='tshirt'?0.3:0.7;
+  const sleeveW=0.22;
+  const sleeveD=0.2;
+
+  // Left sleeve
+  const lSleeveGrp=new THREE.Group();
+  const lSlF=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveW),darkMat.clone());
+  lSleeveGrp.add(lSlF);
+  const lSlB=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveW),darkMat);
+  lSlB.rotation.y=Math.PI;lSlB.position.z=-sleeveD;
+  lSleeveGrp.add(lSlB);
+  const lSlT=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveD),darkMat);
+  lSlT.rotation.x=-Math.PI/2;lSlT.position.y=sleeveW/2;lSlT.position.z=-sleeveD/2;
+  lSleeveGrp.add(lSlT);
+  const lSlBo=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveD),darkMat);
+  lSlBo.rotation.x=Math.PI/2;lSlBo.position.y=-sleeveW/2;lSlBo.position.z=-sleeveD/2;
+  lSleeveGrp.add(lSlBo);
+  lSleeveGrp.position.set(-(bodyW/2+sleeveLen/2),bodyH/2-sleeveW/2-0.02,-sleeveD/2);
+  lSleeveGrp.rotation.z=-0.15;
+  group.add(lSleeveGrp);
+
+  // Right sleeve
+  const rSleeveGrp=lSleeveGrp.clone();
+  rSleeveGrp.position.set(bodyW/2+sleeveLen/2,bodyH/2-sleeveW/2-0.02,-sleeveD/2);
+  rSleeveGrp.rotation.z=0.15;
+  group.add(rSleeveGrp);
+
+  // ── COLLAR ──
+  if(type==='hoodie'){
+    // Hood
+    const hoodGeo=new THREE.TorusGeometry(0.28,0.08,8,16,Math.PI);
+    const hood=new THREE.Mesh(hoodGeo,darkMat);
+    hood.position.set(0,bodyH/2+0.15,0);hood.rotation.x=-Math.PI/2;
+    group.add(hood);
+    // Hood back
+    const hoodBackGeo=new THREE.SphereGeometry(0.28,12,8,0,Math.PI*2,0,Math.PI/2);
+    const hoodBack=new THREE.Mesh(hoodBackGeo,darkMat);
+    hoodBack.position.set(0,bodyH/2+0.1,-0.1);hoodBack.rotation.x=0.3;
+    group.add(hoodBack);
+  } else {
+    // Regular collar
+    const collarGeo=new THREE.TorusGeometry(0.18,0.04,8,20,Math.PI*1.5);
+    const collar=new THREE.Mesh(collarGeo,darkMat);
+    collar.position.set(0,bodyH/2+0.02,0);collar.rotation.x=-Math.PI/2;collar.rotation.z=Math.PI/4;
+    group.add(collar);
+  }
+
+  // ── BOTTOM HEM ──
+  const hemGeo=new THREE.BoxGeometry(bodyW+0.02,0.04,bodyD+0.02);
+  const hem=new THREE.Mesh(hemGeo,darkMat);
+  hem.position.set(0,-bodyH/2-0.02,0);
+  group.add(hem);
+
+  // ── CUFFS ──
+  const cuffGeo=new THREE.BoxGeometry(0.02,sleeveW+0.02,sleeveD+0.02);
+  const lCuff=new THREE.Mesh(cuffGeo,darkMat);
+  lCuff.position.set(-(bodyW/2+sleeveLen)-0.01,bodyH/2-sleeveW/2-0.02,-sleeveD/2);
+  group.add(lCuff);
+  const rCuff=lCuff.clone();
+  rCuff.position.set(bodyW/2+sleeveLen+0.01,bodyH/2-sleeveW/2-0.02,-sleeveD/2);
+  group.add(rCuff);
+
+  // Centre everything vertically
+  group.position.y=-(bodyH/2);
+}
+
+// Gentle floating animation
+let floatRaf=null,floatT=0;
+function floatAnim(){
+  cancelAnimationFrame(floatRaf);
+  const step=()=>{
+    floatT+=0.016;
+    if(clothGroup)clothGroup.position.y=Math.sin(floatT*0.8)*0.04-0.1;
+    floatRaf=requestAnimationFrame(step);
+  };
+  floatRaf=requestAnimationFrame(step);
 }
 
 // ── Orbit Controls ──
 function setupOrbit(canvas){
-  canvas.addEventListener('mousedown',e=>{orb.dragging=true;orb.lastX=e.clientX;orb.lastY=e.clientY;orb.velT=0;orb.velP=0});
+  canvas.addEventListener('mousedown',e=>{orb.drag=true;orb.lx=e.clientX;orb.ly=e.clientY;orb.vt=0;orb.vp=0;e.preventDefault()});
   canvas.addEventListener('touchstart',e=>{
-    if(e.touches.length===1){orb.dragging=true;orb.lastX=e.touches[0].clientX;orb.lastY=e.touches[0].clientY;orb.velT=0;orb.velP=0}
-    if(e.touches.length===2){orb.pinching=true;orb.pinchDist=pd(e)}
+    if(e.touches.length===1){orb.drag=true;orb.lx=e.touches[0].clientX;orb.ly=e.touches[0].clientY;orb.vt=0;orb.vp=0}
+    if(e.touches.length===2){orb.pinch=true;orb.pd=pinchD(e)}
   },{passive:true});
   window.addEventListener('mousemove',e=>{
-    if(!orb.dragging)return;
-    const dx=e.clientX-orb.lastX,dy=e.clientY-orb.lastY;
-    orb.velT=dx*0.005;orb.velP=dy*0.005;
-    orb.theta-=dx*0.009;orb.phi=Math.max(0.15,Math.min(Math.PI-0.15,orb.phi-dy*0.007));
-    orb.lastX=e.clientX;orb.lastY=e.clientY;
-    updateCameraOrbit();updateDeg();
+    if(!orb.drag)return;
+    const dx=e.clientX-orb.lx,dy=e.clientY-orb.ly;
+    orb.vt=dx*0.006;orb.vp=dy*0.006;
+    orb.theta-=dx*0.01;orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi-dy*0.008));
+    orb.lx=e.clientX;orb.ly=e.clientY;
+    updateCam();updDeg();
   });
   window.addEventListener('touchmove',e=>{
-    if(orb.dragging&&e.touches.length===1){
-      const dx=e.touches[0].clientX-orb.lastX,dy=e.touches[0].clientY-orb.lastY;
-      orb.velT=dx*0.005;orb.velP=dy*0.005;
-      orb.theta-=dx*0.009;orb.phi=Math.max(0.15,Math.min(Math.PI-0.15,orb.phi-dy*0.007));
-      orb.lastX=e.touches[0].clientX;orb.lastY=e.touches[0].clientY;
-      updateCameraOrbit();updateDeg();
+    if(orb.drag&&e.touches.length===1){
+      const dx=e.touches[0].clientX-orb.lx,dy=e.touches[0].clientY-orb.ly;
+      orb.vt=dx*0.006;orb.vp=dy*0.006;
+      orb.theta-=dx*0.01;orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi-dy*0.008));
+      orb.lx=e.touches[0].clientX;orb.ly=e.touches[0].clientY;
+      updateCam();updDeg();
     }
-    if(orb.pinching&&e.touches.length===2){
-      const d=pd(e);orb.radius=Math.max(1.8,Math.min(8,orb.radius*orb.pinchDist/d));orb.pinchDist=d;updateCameraOrbit();
+    if(orb.pinch&&e.touches.length===2){
+      const d=pinchD(e);orb.r=Math.max(1.2,Math.min(7,orb.r*orb.pd/d));orb.pd=d;updateCam();
     }
   },{passive:true});
-  window.addEventListener('mouseup',()=>{if(orb.dragging){orb.dragging=false;momentum()}});
-  window.addEventListener('touchend',()=>{orb.dragging=false;orb.pinching=false;momentum()});
-  canvas.addEventListener('wheel',e=>{e.preventDefault();orb.radius=Math.max(1.8,Math.min(8,orb.radius+e.deltaY*0.006));updateCameraOrbit()},{passive:false});
+  window.addEventListener('mouseup',()=>{if(orb.drag){orb.drag=false;momentum()}});
+  window.addEventListener('touchend',()=>{orb.drag=false;orb.pinch=false;momentum()});
+  canvas.addEventListener('wheel',e=>{e.preventDefault();orb.r=Math.max(1.2,Math.min(7,orb.r+e.deltaY*0.005));updateCam()},{passive:false});
 }
-function pd(e){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;return Math.sqrt(dx*dx+dy*dy)}
+function pinchD(e){return Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)}
 let momRaf=null;
 function momentum(){
   cancelAnimationFrame(momRaf);
   const go=()=>{
-    orb.velT*=0.92;orb.velP*=0.92;
-    if(Math.abs(orb.velT)<0.0003&&Math.abs(orb.velP)<0.0003)return;
-    orb.theta-=orb.velT*12;orb.phi=Math.max(0.15,Math.min(Math.PI-0.15,orb.phi-orb.velP*12));
-    updateCameraOrbit();updateDeg();
-    momRaf=requestAnimationFrame(go);
-  };
-  momRaf=requestAnimationFrame(go);
+    orb.vt*=0.92;orb.vp*=0.92;
+    if(Math.abs(orb.vt)<0.0003&&Math.abs(orb.vp)<0.0003)return;
+    orb.theta-=orb.vt*12;orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi-orb.vp*12));
+    updateCam();updDeg();momRaf=requestAnimationFrame(go);
+  };momRaf=requestAnimationFrame(go);
 }
-function updateCameraOrbit(){
+function updateCam(){
   if(!camera)return;
-  const x=orb.target.x+orb.radius*Math.sin(orb.phi)*Math.sin(orb.theta);
-  const y=orb.target.y+orb.radius*Math.cos(orb.phi);
-  const z=orb.target.z+orb.radius*Math.sin(orb.phi)*Math.cos(orb.theta);
-  camera.position.set(x,y,z);camera.lookAt(orb.target);
+  const x=TARGET.x+orb.r*Math.sin(orb.phi)*Math.sin(orb.theta);
+  const y=TARGET.y+orb.r*Math.cos(orb.phi);
+  const z=TARGET.z+orb.r*Math.sin(orb.phi)*Math.cos(orb.theta);
+  camera.position.set(x,y,z);camera.lookAt(TARGET);
 }
-function updateDeg(){const d=((orb.theta*180/Math.PI)%360+360)%360;document.getElementById('v3dDeg').textContent=Math.round(d)+'°'}
-function reset3D(){orb.theta=0.3;orb.phi=1.1;orb.radius=3.8;orb.velT=0;orb.velP=0;updateCameraOrbit();updateDeg()}
-function zoom3D(f){orb.radius=Math.max(1.8,Math.min(8,orb.radius*f));updateCameraOrbit()}
+function updDeg(){const d=((orb.theta*180/Math.PI)%360+360)%360;document.getElementById('v3deg').textContent=Math.round(d)+'°'}
+function reset3D(){orb.theta=0.4;orb.phi=1.3;orb.r=2.8;orb.vt=0;orb.vp=0;updateCam();updDeg()}
+function z3(f){orb.r=Math.max(1.2,Math.min(7,orb.r*f));updateCam()}
 function animate3D(){
   animId=requestAnimationFrame(animate3D);
-  if(!orb.dragging&&Math.abs(orb.velT)<0.001){orb.theta+=0.004;updateCameraOrbit();updateDeg()}
+  // Slow auto-rotate when idle
+  if(!orb.drag&&Math.abs(orb.vt)<0.001){orb.theta+=0.005;updateCam();updDeg()}
   renderer.render(scene,camera);
 }
 
 // ── View Switcher ──
-function setView(v){
+function setV(v){
   document.getElementById('swiper').style.display=v==='photos'?'flex':'none';
   document.getElementById('viewer3d').classList.toggle('show',v==='360');
   document.getElementById('mdots').style.display=v==='photos'?'flex':'none';
   document.getElementById('tph').classList.toggle('on',v==='photos');
   document.getElementById('t360').classList.toggle('on',v==='360');
-  if(v==='360'){setTimeout(()=>{init3D();updateCameraOrbit()},50);}
-  else{cancelAnimationFrame(animId);animId=null;}
+  if(v==='360'){setTimeout(()=>{init3D();updateCam();},50);}
+  else{if(animId){cancelAnimationFrame(animId);animId=null;}cancelAnimationFrame(floatRaf);}
 }
 function pickSz(el){document.querySelectorAll('.sbtn:not(.oos)').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
 let wished=false;
@@ -735,11 +689,14 @@ function startARCam(){
       const v=document.getElementById('arv');v.srcObject=stream;
       v.onloadedmetadata=()=>{
         setARStat('Stand back — show full body');
-        setTimeout(()=>{scanDone=true;document.getElementById('scanline').classList.add('done');['ctl','ctr','cbl','cbr'].forEach(id=>document.getElementById(id).classList.add('go'));},2600);
+        setTimeout(()=>{
+          scanDone=true;
+          document.getElementById('scanline').classList.add('done');
+          ['ctl','ctr','cbl','cbr'].forEach(id=>document.getElementById(id).classList.add('go'));
+        },2600);
         startARPose(v);
       };
-    })
-    .catch(()=>setARStat('Camera denied — allow in browser settings','err'));
+    }).catch(()=>setARStat('Camera denied — allow in browser settings','err'));
 }
 function flipCam(){facing=facing==='user'?'environment':'user';closeAR();setTimeout(openAR,400)}
 function startARPose(video){
@@ -770,17 +727,16 @@ function drawClothingAR(ctx,w,h,lm){
   const lS=lm[11],rS=lm[12],lH=lm[23],rH=lm[24];
   if(!lS||!rS||!lH||!rH)return;
   const opacity=document.getElementById('aropa').value/100;
-  const userScale=document.getElementById('arsc').value/100;
+  const usc=document.getElementById('arsc').value/100;
   const lsx=(1-lS.x)*w,lsy=lS.y*h,rsx=(1-rS.x)*w,rsy=rS.y*h;
   const cx=(lsx+rsx)/2,cy=(lsy+rsy)/2;
-  const shoulderW=Math.sqrt(Math.pow(rsx-lsx,2)+Math.pow(rsy-lsy,2));
+  const sw=Math.sqrt((rsx-lsx)**2+(rsy-lsy)**2);
   const avgHY=(lH.y*h+rH.y*h)/2;
   const torsoH=avgHY-cy;
   const angle=Math.atan2(rsy-lsy,rsx-lsx);
-  const tW=shoulderW*1.88*userScale,tH=torsoH*1.65*userScale;
-  const tX=cx-tW/2,tY=cy-tH*0.07;
+  const tW=sw*1.88*usc,tH=torsoH*1.65*usc;
   smW+=(tW-smW)*SM;smH+=(tH-smH)*SM;
-  smX+=(tX-smX)*SM;smY+=(tY-smY)*SM;
+  smX+=(cx-tW/2-smX)*SM;smY+=(cy-tH*0.07-smY)*SM;
   smA+=(angle-smA)*SM;
   const img=CACHE[SEL.url];
   if(!img||!img.complete||!img.naturalWidth)return;
@@ -790,9 +746,9 @@ function drawClothingAR(ctx,w,h,lm){
   ctx.globalAlpha=1;ctx.restore();
 }
 function doSnap(){
-  const canvas=document.getElementById('arc');
   const fl=document.getElementById('flash');
   fl.classList.add('pop');setTimeout(()=>fl.classList.remove('pop'),120);
+  const canvas=document.getElementById('arc');
   const link=document.createElement('a');
   link.download='fitcheck-'+SEL.name.replace(/\s+/g,'-').toLowerCase()+'.png';
   link.href=canvas.toDataURL('image/png');link.click();
@@ -807,3 +763,5 @@ init();
 </script>
 </body>
 </html>
+HTMLEOF
+echo "Done"
