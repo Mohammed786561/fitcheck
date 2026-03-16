@@ -1,169 +1,147 @@
+cat << 'HTMLEOF' > /mnt/user-data/outputs/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FitCheck — AI Virtual Try-On</title>
+<title>FitCheck — AR Try On</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f9f9f7; color: #1a1a1a; }
-nav { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-.nav-logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-.nav-logo span { color: #1a5fb4; }
-.nav-badge { background: #e8f0fe; color: #1a5fb4; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; }
-.hero { background: #fff; padding: 2.5rem 2rem 1.5rem; text-align: center; border-bottom: 1px solid #e8e8e4; }
-.hero h1 { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
-.hero h1 span { color: #1a5fb4; }
-.hero p { font-size: 15px; color: #666; max-width: 500px; margin: 0 auto; line-height: 1.6; }
-.section { max-width: 1060px; margin: 2rem auto; padding: 0 1.5rem; }
-.section-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
-.add-btn { background: #1a5fb4; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-.products { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
-.product-card { background: #fff; border: 1.5px solid #e8e8e4; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.15s; }
-.product-card:hover { border-color: #aaa; transform: translateY(-2px); }
-.product-card.selected { border: 2.5px solid #1a5fb4; }
-.product-img-wrap { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: #f5f5f3; position: relative; }
-.product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.product-img-wrap .no-img { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; }
-.product-info { padding: 10px 12px; border-top: 1px solid #f0f0ec; }
-.product-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.product-price { font-size: 12px; color: #888; }
-.try-badge { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; margin-top: 5px; background: #e8f0fe; color: #1a5fb4; }
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
-.modal-bg.open { display: flex; }
-.modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 440px; }
-.modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 0.25rem; }
-.modal p { font-size: 13px; color: #888; margin-bottom: 1rem; line-height: 1.5; }
-.modal input { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 10px; outline: none; }
-.modal input:focus { border-color: #1a5fb4; }
-.modal-btns { display: flex; gap: 8px; }
-.modal-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; }
-.btn-cancel { background: #f5f5f3; border: 1px solid #ddd; color: #555; }
-.btn-add { background: #1a5fb4; border: none; color: #fff; }
-.preview-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; margin-bottom: 10px; display: none; background: #f5f5f3; }
-.tryon-wrap { max-width: 1060px; margin: 0 auto 2rem; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
-.cam-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #111; border-radius: 16px; overflow: hidden; }
-#video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
-#canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #111; padding: 2rem; text-align: center; }
-.cam-overlay h3 { font-size: 20px; color: #fff; font-weight: 700; }
-.cam-overlay p { font-size: 14px; color: #aaa; line-height: 1.6; max-width: 280px; }
-.scan-steps { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 260px; }
-.scan-step { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 8px; }
-.scan-step-num { width: 20px; height: 20px; border-radius: 50%; background: #1a5fb4; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.start-btn { background: #1a5fb4; color: #fff; border: none; padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; max-width: 260px; }
-.start-btn:hover { background: #1450a0; }
-.ai-badge { position: absolute; top: 12px; left: 12px; background: rgba(26,95,180,0.92); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
-.pose-badge { position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
-.pose-badge.detected { background: rgba(30,126,52,0.92); color: #fff; display: block; }
-.pose-badge.searching { background: rgba(180,120,0,0.92); color: #fff; display: block; }
-.pose-badge.error { background: rgba(180,30,30,0.92); color: #fff; display: block; }
-.scan-ring-wrap { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; pointer-events: none; }
-.scan-ring-wrap.show { display: flex; }
-.scan-ring { width: 200px; height: 200px; position: relative; }
-.scan-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.scan-ring-circle { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 6; }
-.scan-ring-progress { fill: none; stroke: #1a5fb4; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 565; stroke-dashoffset: 565; transition: stroke-dashoffset 0.3s; }
-.scan-label { font-size: 14px; color: #fff; font-weight: 600; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
-.scan-sublabel { font-size: 12px; color: #aaa; text-align: center; }
-.person-outline { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-.person-outline svg { opacity: 0.25; }
-.sidebar { display: flex; flex-direction: column; gap: 14px; }
-.panel { background: #fff; border: 1px solid #e8e8e4; border-radius: 12px; padding: 1rem 1.1rem; }
-.panel-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 10px; }
-.selected-preview { width: 100%; aspect-ratio: 3/4; border-radius: 8px; object-fit: cover; background: #f5f5f3; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #aaa; margin-bottom: 10px; overflow: hidden; }
-.selected-preview img { width: 100%; height: 100%; object-fit: cover; }
-.selected-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-.selected-price { font-size: 13px; color: #888; margin-bottom: 10px; }
-.size-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.size-btn { border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; background: #fff; }
-.size-btn.active, .size-btn:hover { border-color: #1a5fb4; color: #1a5fb4; font-weight: 500; }
-.status-box { background: #f5f5f3; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #555; line-height: 1.5; text-align: center; }
-.status-box.live { background: #e8f0fe; color: #1a5fb4; }
-.status-box.detected { background: #e6f4ea; color: #1e7e34; }
-.status-box.error { background: #fce8e8; color: #c0392b; }
-.buy-btn { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
-.buy-btn:hover { background: #333; }
-.how { background: #1a1a1a; color: #fff; padding: 2.5rem 2rem; text-align: center; margin-top: 1rem; }
-.how h2 { font-size: 22px; font-weight: 600; margin-bottom: 0.4rem; }
-.how-sub { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
-.how-steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; max-width: 700px; margin: 0 auto; }
-.how-step-num { width: 32px; height: 32px; border-radius: 50%; background: #1a5fb4; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin: 0 auto 8px; }
-.how-step-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-.how-step-desc { font-size: 12px; color: #888; line-height: 1.4; }
-footer { background: #fff; border-top: 1px solid #e8e8e4; padding: 1.25rem 2rem; text-align: center; font-size: 13px; color: #888; }
-footer span { color: #1a5fb4; font-weight: 500; }
-@media(max-width:680px) {
-  .tryon-wrap { grid-template-columns: 1fr; }
-  .how-steps { grid-template-columns: repeat(2,1fr); }
-  .hero h1 { font-size: 26px; }
-}
+body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f9f9f7; color: #1a1a1a; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+nav { background: #fff; border-bottom: 1px solid #eee; padding: 0 1.2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+.nav-back { font-size: 22px; color: #555; cursor: pointer; background: none; border: none; }
+.nav-title { font-size: 15px; font-weight: 600; }
+.nav-icons { display: flex; gap: 16px; font-size: 20px; color: #555; }
+
+/* PRODUCT HEADER */
+.product-header { background: #fff; padding: 1rem 1.2rem 0.5rem; }
+.product-img-main { width: 100%; aspect-ratio: 4/3; background: #f5f5f3; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; position: relative; }
+.product-img-main img { width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; }
+
+/* VIEW TABS */
+.view-tabs { display: flex; gap: 8px; margin-bottom: 1rem; }
+.view-tab { flex: 1; padding: 10px 6px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; background: #fff; color: #555; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.15s; }
+.view-tab svg { width: 20px; height: 20px; }
+.view-tab.active { border-color: #1a5fb4; color: #1a5fb4; background: #f0f5ff; }
+.view-tab.ar-tab { background: #1a5fb4; border-color: #1a5fb4; color: #fff; }
+.view-tab.ar-tab.active { background: #1450a0; }
+
+/* PRODUCT INFO */
+.product-info-section { background: #fff; padding: 1rem 1.2rem; border-top: 8px solid #f5f5f3; }
+.product-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.stars { color: #f5a623; font-size: 13px; }
+.rating-count { font-size: 12px; color: #888; }
+.product-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.product-price { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.product-offer { font-size: 12px; color: #1e7e34; font-weight: 500; }
+.size-section { margin-top: 1rem; }
+.size-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 8px; }
+.size-row { display: flex; gap: 8px; }
+.size-btn { border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; background: #fff; }
+.size-btn.active { border-color: #1a5fb4; color: #1a5fb4; font-weight: 600; background: #f0f5ff; }
+.add-cart-btn { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1.2rem; }
+.add-cart-btn:hover { background: #333; }
+
+/* CATALOGUE */
+.catalogue-section { background: #fff; padding: 1rem 1.2rem; border-top: 8px solid #f5f5f3; }
+.cat-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 10px; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cat-item { border: 1.5px solid #eee; border-radius: 10px; overflow: hidden; cursor: pointer; background: #fff; transition: all 0.15s; }
+.cat-item:hover { border-color: #aaa; }
+.cat-item.active { border-color: #1a5fb4; }
+.cat-item-img { width: 100%; aspect-ratio: 4/3; background: #f9f9f7; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.cat-item-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.cat-item-info { padding: 6px 8px; }
+.cat-item-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-item-price { font-size: 11px; color: #888; }
+
+/* AR MODAL */
+.ar-modal { position: fixed; inset: 0; background: #000; z-index: 300; display: none; flex-direction: column; max-width: 480px; margin: 0 auto; }
+.ar-modal.open { display: flex; }
+.ar-top { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+.ar-close { background: rgba(0,0,0,0.5); color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ar-item-name { font-size: 13px; font-weight: 600; color: #fff; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 100px; }
+.ar-badge { font-size: 11px; font-weight: 600; color: #fff; background: rgba(26,95,180,0.9); padding: 4px 10px; border-radius: 100px; }
+.ar-cam-wrap { position: relative; flex: 1; overflow: hidden; }
+#ar-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+#ar-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.ar-status { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: #fff; font-size: 12px; padding: 6px 16px; border-radius: 100px; white-space: nowrap; }
+.ar-status.green { background: rgba(30,126,52,0.85); }
+.ar-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(transparent, rgba(0,0,0,0.7)); }
+.ar-thumb-row { display: flex; gap: 8px; overflow-x: auto; }
+.ar-thumb { width: 54px; height: 54px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); overflow: hidden; cursor: pointer; flex-shrink: 0; background: #fff; }
+.ar-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.ar-thumb.active { border-color: #1a5fb4; }
+.ar-snap-btn { width: 54px; height: 54px; border-radius: 50%; background: #fff; border: 3px solid rgba(255,255,255,0.5); cursor: pointer; flex-shrink: 0; }
+
+/* 360 VIEW */
+.view-360-wrap { width: 100%; aspect-ratio: 4/3; background: #f0f0f0; border-radius: 12px; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+.view-360-wrap.show { display: flex; }
+.view-360-inner { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.rotating-product { animation: spin360 4s linear infinite; }
+@keyframes spin360 { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+.view-360-label { font-size: 12px; color: #888; position: absolute; bottom: 12px; }
 </style>
 </head>
 <body>
+
 <nav>
-  <div class="nav-logo">Fit<span>Check</span></div>
-  <div class="nav-badge">AI Powered — Beta</div>
-</nav>
-<div class="hero">
-  <h1>Try real clothes on <span>your body</span></h1>
-  <p>Add any clothing photo from any website, start the 360° body scan, and see it on you in real time using AI.</p>
-</div>
-<div class="section">
-  <div class="section-top">
-    <div class="section-title">Clothing catalogue — add your own items</div>
-    <button class="add-btn" onclick="openModal()">+ Add clothing</button>
+  <button class="nav-back">&#8592;</button>
+  <div class="nav-title">Men's Clothing</div>
+  <div class="nav-icons">
+    <span>&#9825;</span>
+    <span>&#128722;</span>
   </div>
-  <div class="products" id="products-grid"></div>
-</div>
-<div class="tryon-wrap">
-  <div class="cam-outer">
-    <div class="cam-wrap">
-      <video id="video" autoplay playsinline muted></video>
-      <canvas id="canvas"></canvas>
-      <div class="person-outline">
-        <svg width="160" height="300" viewBox="0 0 160 300">
-          <ellipse cx="80" cy="35" rx="28" ry="32" fill="none" stroke="white" stroke-width="2"/>
-          <line x1="80" y1="67" x2="80" y2="180" stroke="white" stroke-width="2"/>
-          <line x1="80" y1="90" x2="25" y2="150" stroke="white" stroke-width="2"/>
-          <line x1="80" y1="90" x2="135" y2="150" stroke="white" stroke-width="2"/>
-          <line x1="80" y1="180" x2="45" y2="280" stroke="white" stroke-width="2"/>
-          <line x1="80" y1="180" x2="115" y2="280" stroke="white" stroke-width="2"/>
-        </svg>
+</nav>
+
+<!-- PRODUCT PAGE -->
+<div id="product-page">
+  <!-- Main image / 360 / AR selector -->
+  <div class="product-header">
+    <!-- Photos view -->
+    <div id="photos-view">
+      <div class="product-img-main">
+        <img id="main-product-img" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80" alt="Product"/>
       </div>
-      <div class="scan-ring-wrap" id="scan-ring-wrap">
-        <div class="scan-ring">
-          <svg viewBox="0 0 200 200">
-            <circle class="scan-ring-circle" cx="100" cy="100" r="90"/>
-            <circle class="scan-ring-progress" id="scan-progress" cx="100" cy="100" r="90"/>
-          </svg>
-        </div>
-        <div class="scan-label" id="scan-label">Stand still — scanning...</div>
-        <div class="scan-sublabel" id="scan-sublabel">Make sure your full body is visible</div>
+    </div>
+
+    <!-- 360 view -->
+    <div class="view-360-wrap" id="view-360">
+      <div class="view-360-inner">
+        <img class="rotating-product" id="img-360" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80" style="width:220px;height:220px;object-fit:contain;border-radius:8px;" alt="360"/>
+        <div class="view-360-label">Drag to rotate &nbsp;&#8635;</div>
       </div>
-      <div class="cam-overlay" id="overlay">
-        <h3>360° Body Scan</h3>
-        <p>Stand 1–2 metres from your camera. Your full body should be visible.</p>
-        <div class="scan-steps">
-          <div class="scan-step"><div class="scan-step-num">1</div>Stand facing the camera</div>
-          <div class="scan-step"><div class="scan-step-num">2</div>Slowly turn in a full circle</div>
-          <div class="scan-step"><div class="scan-step-num">3</div>AI builds your body model</div>
-          <div class="scan-step"><div class="scan-step-num">4</div>Clothes appear on you live</div>
-        </div>
-        <button class="start-btn" onclick="startScan()">Start Body Scan</button>
+    </div>
+
+    <!-- View tabs -->
+    <div class="view-tabs">
+      <div class="view-tab active" id="tab-photos" onclick="switchView('photos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Photos
       </div>
-      <div class="ai-badge" id="ai-badge">FitCheck AI</div>
-      <div class="pose-badge" id="pose-badge"></div>
+      <div class="view-tab" id="tab-360" onclick="switchView('360')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        360° view
+      </div>
+      <div class="view-tab ar-tab" id="tab-ar" onclick="openAR()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        AR Try On
+      </div>
     </div>
   </div>
-  <div class="sidebar">
-    <div class="panel">
-      <div class="panel-label">Selected item</div>
-      <div class="selected-preview" id="selected-preview"><span>No item selected</span></div>
-      <div class="selected-name" id="sel-name">Pick a product above</div>
-      <div class="selected-price" id="sel-price"></div>
-      <div class="size-row" id="size-row" style="display:none;">
+
+  <!-- Product info -->
+  <div class="product-info-section">
+    <div class="product-rating">
+      <span class="stars">★★★★★</span>
+      <span class="rating-count" id="prod-rating">4.7 (2,306)</span>
+    </div>
+    <div class="product-name" id="prod-name">Black Premium Hoodie</div>
+    <div class="product-price" id="prod-price">$59.99</div>
+    <div class="product-offer">Buy 1 Get 1 Free &nbsp;•&nbsp; Free shipping</div>
+    <div class="size-section">
+      <div class="size-label">Size</div>
+      <div class="size-row">
         <div class="size-btn" onclick="pickSize(this)">XS</div>
         <div class="size-btn active" onclick="pickSize(this)">S</div>
         <div class="size-btn" onclick="pickSize(this)">M</div>
@@ -171,135 +149,215 @@ footer span { color: #1a5fb4; font-weight: 500; }
         <div class="size-btn" onclick="pickSize(this)">XL</div>
       </div>
     </div>
-    <div class="status-box" id="status">Select a clothing item above to begin</div>
-    <div class="panel">
-      <div class="panel-label">Scan status</div>
-      <div style="font-size:13px;color:#555;line-height:1.6;" id="ai-status">Waiting to start — press "Start Body Scan" when ready.</div>
-    </div>
-    <button class="buy-btn" id="buy-btn" style="display:none;" onclick="alert('Added to cart!')">Add to Cart</button>
+    <button class="add-cart-btn">Add to Cart</button>
+  </div>
+
+  <!-- Catalogue -->
+  <div class="catalogue-section">
+    <div class="cat-title">More items — tap to switch</div>
+    <div class="cat-grid" id="cat-grid"></div>
   </div>
 </div>
-<div class="modal-bg" id="modal-bg">
-  <div class="modal">
-    <h3>Add clothing item</h3>
-    <p>Paste the image URL of any clothing photo from any website (right-click image → Copy image address)</p>
-    <input type="text" id="img-url" placeholder="https://... (paste image URL here)" oninput="previewImg(this.value)"/>
-    <img id="preview-img" class="preview-img" alt="preview"/>
-    <input type="text" id="item-name" placeholder="Name (e.g. Blue Denim Jacket)"/>
-    <input type="text" id="item-price" placeholder="Price (e.g. $79.99)"/>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-add" onclick="addItem()">Add to catalogue</button>
-    </div>
+
+<!-- AR MODAL -->
+<div class="ar-modal" id="ar-modal">
+  <div class="ar-top">
+    <button class="ar-close" onclick="closeAR()">&#10005;</button>
+    <div class="ar-item-name" id="ar-item-label">Black Hoodie</div>
+    <div class="ar-badge">FitCheck AR</div>
+  </div>
+  <div class="ar-cam-wrap">
+    <video id="ar-video" autoplay playsinline muted></video>
+    <canvas id="ar-canvas"></canvas>
+    <div class="ar-status" id="ar-status">Starting camera...</div>
+  </div>
+  <div class="ar-bottom">
+    <div class="ar-thumb-row" id="ar-thumb-row"></div>
+    <button class="ar-snap-btn" onclick="snapPhoto()" title="Take photo"></button>
   </div>
 </div>
-<div class="how">
-  <h2>How FitCheck works</h2>
-  <div class="how-sub">Real AI body tracking — just a regular phone or laptop camera</div>
-  <div class="how-steps">
-    <div><div class="how-step-num">1</div><div class="how-step-title">Add clothes</div><div class="how-step-desc">Paste any clothing image URL from any website</div></div>
-    <div><div class="how-step-num">2</div><div class="how-step-title">360° scan</div><div class="how-step-desc">Turn slowly — AI builds your full body model</div></div>
-    <div><div class="how-step-num">3</div><div class="how-step-title">Try it on</div><div class="how-step-desc">Real clothing image fits to your body live</div></div>
-    <div><div class="how-step-num">4</div><div class="how-step-title">Buy confident</div><div class="how-step-desc">Know it fits before you order</div></div>
-  </div>
-</div>
-<footer><span>FitCheck</span> — AI virtual try-on prototype &nbsp;&bull;&nbsp; Built for clothing brands &nbsp;&bull;&nbsp; Powered by Google MediaPipe</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script>
-const defaultItems = [
-  { id:1, name:'White Oversized Tee', price:'$29.99', url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', color:'#e0e0e0' },
-  { id:2, name:'Black Hoodie', price:'$59.99', url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80', color:'#222' },
-  { id:3, name:'Denim Jacket', price:'$89.99', url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=400&q=80', color:'#4A6A9A' },
-  { id:4, name:'Beige Trench Coat', price:'$129.99', url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400&q=80', color:'#C4A882' },
+const catalogue = [
+  { id:1, name:'Black Hoodie', price:'$59.99', url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80', color:'#222222' },
+  { id:2, name:'White Tee', price:'$29.99', url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80', color:'#eeeeee' },
+  { id:3, name:'Denim Jacket', price:'$89.99', url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=600&q=80', color:'#4A6A9A' },
+  { id:4, name:'Trench Coat', price:'$129.99', url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600&q=80', color:'#C4A882' },
+  { id:5, name:'Grey Sweatshirt', price:'$49.99', url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80', color:'#888888' },
+  { id:6, name:'Navy Polo', price:'$39.99', url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=600&q=80', color:'#1a3a6a' },
 ];
-let items=[...defaultItems], selectedItem=null, scanProgress=0, scanInterval=null, scanComplete=false, mpCamera=null;
-function renderCatalogue(){
-  const grid=document.getElementById('products-grid'); grid.innerHTML='';
-  items.forEach(item=>{
-    const card=document.createElement('div');
-    card.className='product-card'+(selectedItem&&selectedItem.id===item.id?' selected':'');
-    card.onclick=()=>selectItem(item,card);
-    card.innerHTML=`<div class="product-img-wrap"><img src="${item.url}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div class="no-img" style="display:none;">👕</div></div><div class="product-info"><div class="product-name">${item.name}</div><div class="product-price">${item.price}</div><span class="try-badge">Try On</span></div>`;
-    grid.appendChild(card);
+
+let selectedItem = catalogue[0];
+let mpCamera = null;
+let poseActive = false;
+const imgCache = {};
+
+function renderCatalogue() {
+  const grid = document.getElementById('cat-grid');
+  const arRow = document.getElementById('ar-thumb-row');
+  grid.innerHTML = ''; arRow.innerHTML = '';
+  catalogue.forEach(item => {
+    // main catalogue
+    const el = document.createElement('div');
+    el.className = 'cat-item' + (selectedItem.id === item.id ? ' active' : '');
+    el.onclick = () => switchItem(item);
+    el.innerHTML = `<div class="cat-item-img"><img src="${item.url}" alt="${item.name}" onerror="this.style.display='none'"/></div><div class="cat-item-info"><div class="cat-item-name">${item.name}</div><div class="cat-item-price">${item.price}</div></div>`;
+    grid.appendChild(el);
+    // AR thumbnails
+    const th = document.createElement('div');
+    th.className = 'ar-thumb' + (selectedItem.id === item.id ? ' active' : '');
+    th.onclick = () => switchItem(item);
+    th.innerHTML = `<img src="${item.url}" alt="${item.name}"/>`;
+    arRow.appendChild(th);
   });
 }
-function selectItem(item,card){
-  selectedItem=item;
-  document.querySelectorAll('.product-card').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected');
-  document.getElementById('sel-name').textContent=item.name;
-  document.getElementById('sel-price').textContent=item.price;
-  document.getElementById('size-row').style.display='flex';
-  document.getElementById('buy-btn').style.display='block';
-  const prev=document.getElementById('selected-preview');
-  prev.innerHTML=`<img src="${item.url}" alt="${item.name}" onerror="this.outerHTML='<span>Image not available</span>'"/>`;
-  setStatus(item.name+' selected — start scan!','live');
+
+function switchItem(item) {
+  selectedItem = item;
+  document.getElementById('main-product-img').src = item.url;
+  document.getElementById('img-360').src = item.url;
+  document.getElementById('prod-name').textContent = item.name;
+  document.getElementById('prod-price').textContent = item.price;
+  document.getElementById('ar-item-label').textContent = item.name;
+  renderCatalogue();
 }
-function pickSize(el){ document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
-function setStatus(msg,type){ const s=document.getElementById('status'); s.textContent=msg; s.className='status-box '+(type||''); }
-function openModal(){ document.getElementById('modal-bg').classList.add('open'); }
-function closeModal(){ document.getElementById('modal-bg').classList.remove('open'); document.getElementById('img-url').value=''; document.getElementById('item-name').value=''; document.getElementById('item-price').value=''; document.getElementById('preview-img').style.display='none'; }
-function previewImg(url){ const img=document.getElementById('preview-img'); if(url.startsWith('http')){ img.src=url; img.style.display='block'; } else { img.style.display='none'; } }
-function addItem(){ const url=document.getElementById('img-url').value.trim(); const name=document.getElementById('item-name').value.trim()||'My Item'; const price=document.getElementById('item-price').value.trim()||'$0.00'; if(!url){ alert('Please paste an image URL first!'); return; } items.push({id:Date.now(),name,price,url,color:'#888'}); renderCatalogue(); closeModal(); }
-function startScan(){
-  if(!selectedItem){ alert('Please select a clothing item first!'); return; }
-  document.getElementById('overlay').style.display='none';
-  document.getElementById('ai-badge').style.display='block';
-  document.getElementById('scan-ring-wrap').classList.add('show');
-  document.getElementById('pose-badge').className='pose-badge searching';
-  document.getElementById('pose-badge').textContent='Scanning...';
-  setStatus('Scanning your body — turn slowly in a full circle','live');
-  document.getElementById('ai-status').textContent='Slowly turn 360°. Keep your full body visible. The scan takes about 5 seconds.';
-  startProgressRing();
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480},audio:false})
-    .then(stream=>{ const video=document.getElementById('video'); video.srcObject=stream; video.onloadedmetadata=()=>{ startPose(video); }; })
-    .catch(()=>{ document.getElementById('pose-badge').className='pose-badge error'; document.getElementById('pose-badge').textContent='Camera error'; document.getElementById('scan-ring-wrap').classList.remove('show'); document.getElementById('ai-status').textContent='Camera access was denied. Please allow camera access in your browser settings and try again.'; setStatus('Camera access denied — check browser settings','error'); });
+
+function switchView(view) {
+  document.getElementById('photos-view').style.display = view === 'photos' ? 'block' : 'none';
+  document.getElementById('view-360').style.display = view === '360' ? 'flex' : 'none';
+  document.getElementById('tab-photos').classList.toggle('active', view === 'photos');
+  document.getElementById('tab-360').classList.toggle('active', view === '360');
 }
-function startProgressRing(){
-  scanProgress=0; const circle=document.getElementById('scan-progress'); const label=document.getElementById('scan-label'); const circumference=565;
-  const messages=[[0,'Stand facing forward...'],[25,'Turn slowly to your right...'],[50,'Keep turning — halfway there!'],[75,'Almost done — nearly full circle!'],[95,'Scan complete!']];
-  scanInterval=setInterval(()=>{
-    scanProgress+=1;
-    circle.style.strokeDashoffset=circumference-(scanProgress/100)*circumference;
-    const msg=messages.filter(m=>scanProgress>=m[0]).pop();
-    if(msg) label.textContent=msg[1];
-    if(scanProgress>=100){ clearInterval(scanInterval); scanComplete=true; document.getElementById('scan-ring-wrap').classList.remove('show'); document.getElementById('pose-badge').className='pose-badge detected'; document.getElementById('pose-badge').textContent='Scan complete'; document.getElementById('ai-status').textContent='Body scan complete! AI is now tracking your body and overlaying the clothes in real time.'; setStatus('Scan done — '+selectedItem.name+' is on you!','detected'); }
-  },50);
+
+function pickSize(el) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
 }
-function startPose(video){
-  const canvas=document.getElementById('canvas');
-  const pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
-  pose.setOptions({modelComplexity:1,smoothLandmarks:true,minDetectionConfidence:0.55,minTrackingConfidence:0.55});
-  pose.onResults(results=>{
-    canvas.width=video.videoWidth||canvas.offsetWidth; canvas.height=video.videoHeight||canvas.offsetHeight;
-    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save(); ctx.translate(canvas.width,0); ctx.scale(-1,1);
-    ctx.drawImage(results.image,0,0,canvas.width,canvas.height);
-    if(results.poseLandmarks&&results.poseLandmarks.length>0&&scanComplete){ drawClothingOnBody(ctx,canvas.width,canvas.height,results.poseLandmarks); document.getElementById('pose-badge').className='pose-badge detected'; document.getElementById('pose-badge').textContent='Body tracked'; }
-    else if(scanComplete){ document.getElementById('pose-badge').className='pose-badge searching'; document.getElementById('pose-badge').textContent='Finding body...'; }
+
+// AR
+function openAR() {
+  document.getElementById('ar-modal').classList.add('open');
+  document.getElementById('ar-item-label').textContent = selectedItem.name;
+  startARCamera();
+}
+
+function closeAR() {
+  document.getElementById('ar-modal').classList.remove('open');
+  if (mpCamera) { try { mpCamera.stop(); } catch(e){} mpCamera = null; }
+  const video = document.getElementById('ar-video');
+  if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; }
+}
+
+function setARStatus(msg, green) {
+  const s = document.getElementById('ar-status');
+  s.textContent = msg;
+  s.className = 'ar-status' + (green ? ' green' : '');
+}
+
+function startARCamera() {
+  setARStatus('Starting camera...');
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false })
+    .then(stream => {
+      const video = document.getElementById('ar-video');
+      video.srcObject = stream;
+      video.onloadedmetadata = () => {
+        setARStatus('Stand back — show your full body');
+        startARPose(video);
+      };
+    })
+    .catch(() => {
+      setARStatus('Camera denied — allow camera access and retry');
+    });
+}
+
+function startARPose(video) {
+  const canvas = document.getElementById('ar-canvas');
+  const pose = new Pose({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
+  pose.setOptions({ modelComplexity: 1, smoothLandmarks: true, minDetectionConfidence: 0.55, minTrackingConfidence: 0.55 });
+
+  pose.onResults(results => {
+    canvas.width = video.videoWidth || canvas.offsetWidth;
+    canvas.height = video.videoHeight || canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+    if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+      drawClothingAR(ctx, canvas.width, canvas.height, results.poseLandmarks);
+      setARStatus('Body tracked — ' + selectedItem.name, true);
+    } else {
+      setARStatus('Show your full upper body to the camera');
+    }
     ctx.restore();
   });
-  mpCamera=new Camera(video,{onFrame:async()=>{await pose.send({image:video});},width:640,height:480});
+
+  mpCamera = new Camera(video, {
+    onFrame: async () => { await pose.send({ image: video }); },
+    width: 640, height: 480
+  });
   mpCamera.start();
 }
-const imgCache={};
-function getImg(url){ if(!imgCache[url]){ const img=new Image(); img.crossOrigin='anonymous'; img.src=url; imgCache[url]=img; } return imgCache[url]; }
-function drawClothingOnBody(ctx,w,h,lm){
-  if(!selectedItem) return;
-  const lS=lm[11],rS=lm[12],lH=lm[23],rH=lm[24];
-  if(!lS||!rS||!lH||!rH) return;
-  const lsx=(1-lS.x)*w, lsy=lS.y*h, rsx=(1-rS.x)*w, rsy=rS.y*h;
-  const lhy=lH.y*h, rhy=rH.y*h;
-  const shoulderW=Math.abs(rsx-lsx), torsoH=((lhy+rhy)/2)-((lsy+rsy)/2);
-  const cx=(lsx+rsx)/2, topY=((lsy+rsy)/2)-torsoH*0.12;
-  const drawW=shoulderW*1.7, drawH=torsoH*1.5;
-  const drawX=cx-drawW/2, drawY=topY-drawH*0.05;
-  const img=getImg(selectedItem.url);
-  if(img.complete&&img.naturalWidth>0){ ctx.globalAlpha=0.88; ctx.drawImage(img,drawX,drawY,drawW,drawH); ctx.globalAlpha=1; }
-  else { ctx.fillStyle=selectedItem.color||'#4A90D9'; ctx.globalAlpha=0.6; ctx.beginPath(); ctx.roundRect(drawX,drawY,drawW,drawH,8); ctx.fill(); ctx.globalAlpha=1; }
+
+function getImg(url) {
+  if (!imgCache[url]) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = url;
+    imgCache[url] = img;
+  }
+  return imgCache[url];
 }
+
+function drawClothingAR(ctx, w, h, lm) {
+  const lS = lm[11], rS = lm[12], lH = lm[23], rH = lm[24];
+  if (!lS || !rS || !lH || !rH) return;
+
+  const lsx = (1 - lS.x) * w, lsy = lS.y * h;
+  const rsx = (1 - rS.x) * w, rsy = rS.y * h;
+  const lhy = lH.y * h, rhy = rH.y * h;
+
+  const shoulderW = Math.abs(rsx - lsx);
+  const torsoH = ((lhy + rhy) / 2) - ((lsy + rsy) / 2);
+  const cx = (lsx + rsx) / 2;
+  const topY = ((lsy + rsy) / 2) - torsoH * 0.15;
+
+  const drawW = shoulderW * 1.75;
+  const drawH = torsoH * 1.55;
+  const drawX = cx - drawW / 2;
+  const drawY = topY - drawH * 0.04;
+
+  const img = getImg(selectedItem.url);
+  if (img.complete && img.naturalWidth > 0) {
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.fillStyle = selectedItem.color || '#4A90D9';
+    ctx.globalAlpha = 0.65;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(drawX, drawY, drawW, drawH, 8);
+    else ctx.rect(drawX, drawY, drawW, drawH);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function snapPhoto() {
+  const canvas = document.getElementById('ar-canvas');
+  const link = document.createElement('a');
+  link.download = 'fitcheck-tryon.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
 renderCatalogue();
 </script>
 </body>
 </html>
+HTMLEOF
+echo "Done"
