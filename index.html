@@ -5,120 +5,165 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FitCheck — AI Virtual Try-On</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f9f9f7; color: #1a1a1a; }
-  nav { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-  .nav-logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-  .nav-logo span { color: #1a5fb4; }
-  .nav-badge { background: #e8f0fe; color: #1a5fb4; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
-  .hero { background: #fff; padding: 2.5rem 2rem 2rem; text-align: center; border-bottom: 1px solid #e8e8e4; }
-  .hero h1 { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
-  .hero h1 span { color: #1a5fb4; }
-  .hero p { font-size: 15px; color: #666; max-width: 460px; margin: 0 auto; line-height: 1.6; }
-  .main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
-  .cam-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #111; border-radius: 16px; overflow: hidden; }
-  #video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
-  #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-  .cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #111; padding: 2rem; text-align: center; }
-  .cam-overlay p { font-size: 14px; color: #aaa; line-height: 1.6; }
-  .cam-overlay h3 { font-size: 18px; color: #fff; font-weight: 600; }
-  .start-btn { background: #1a5fb4; color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; }
-  .start-btn:hover { background: #1450a0; }
-  .ai-badge { position: absolute; top: 12px; left: 12px; background: rgba(26,95,180,0.9); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
-  .pose-badge { position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
-  .pose-badge.detected { background: rgba(30,126,52,0.9); color: #fff; display: block; }
-  .pose-badge.searching { background: rgba(180,120,0,0.9); color: #fff; display: block; }
-  .sidebar { display: flex; flex-direction: column; gap: 14px; }
-  .panel { background: #fff; border: 1px solid #e8e8e4; border-radius: 12px; padding: 1rem 1.1rem; }
-  .panel-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 10px; }
-  .clothes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .cloth-btn { border: 1.5px solid #e8e8e4; border-radius: 10px; padding: 10px 6px; text-align: center; cursor: pointer; background: #fff; transition: all 0.15s; }
-  .cloth-btn:hover { border-color: #aaa; }
-  .cloth-btn.active { border-color: #1a5fb4; background: #f0f5ff; }
-  .cloth-icon { font-size: 28px; display: block; margin-bottom: 4px; }
-  .cloth-name { font-size: 12px; font-weight: 500; color: #333; }
-  .cloth-price { font-size: 11px; color: #888; }
-  .status-box { background: #f5f5f3; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #555; line-height: 1.5; text-align: center; }
-  .status-box.live { background: #e8f0fe; color: #1a5fb4; }
-  .status-box.detected { background: #e6f4ea; color: #1e7e34; }
-  .size-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .size-btn { border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; background: #fff; }
-  .size-btn.active, .size-btn:hover { border-color: #1a5fb4; color: #1a5fb4; font-weight: 500; }
-  .buy-btn { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
-  .buy-btn:hover { background: #333; }
-  .how { background: #1a1a1a; color: #fff; padding: 2.5rem 2rem; text-align: center; margin-top: 2rem; }
-  .how h2 { font-size: 22px; font-weight: 600; margin-bottom: 0.4rem; }
-  .how-sub { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
-  .how-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 700px; margin: 0 auto; }
-  .how-step-num { width: 32px; height: 32px; border-radius: 50%; background: #1a5fb4; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin: 0 auto 8px; }
-  .how-step-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-  .how-step-desc { font-size: 12px; color: #888; line-height: 1.4; }
-  footer { background: #fff; border-top: 1px solid #e8e8e4; padding: 1.25rem 2rem; text-align: center; font-size: 13px; color: #888; }
-  footer span { color: #1a5fb4; font-weight: 500; }
-  @media(max-width:680px) {
-    .main { grid-template-columns: 1fr; }
-    .how-steps { grid-template-columns: repeat(2,1fr); }
-    .hero h1 { font-size: 24px; }
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f9f9f7; color: #1a1a1a; }
+nav { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.nav-logo span { color: #1a5fb4; }
+.nav-badge { background: #e8f0fe; color: #1a5fb4; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; }
+.hero { background: #fff; padding: 2.5rem 2rem 1.5rem; text-align: center; border-bottom: 1px solid #e8e8e4; }
+.hero h1 { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
+.hero h1 span { color: #1a5fb4; }
+.hero p { font-size: 15px; color: #666; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+.section { max-width: 1060px; margin: 2rem auto; padding: 0 1.5rem; }
+.section-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+.add-btn { background: #1a5fb4; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.products { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+.product-card { background: #fff; border: 1.5px solid #e8e8e4; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.15s; }
+.product-card:hover { border-color: #aaa; transform: translateY(-2px); }
+.product-card.selected { border: 2.5px solid #1a5fb4; }
+.product-img-wrap { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: #f5f5f3; position: relative; }
+.product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.product-img-wrap .no-img { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+.product-info { padding: 10px 12px; border-top: 1px solid #f0f0ec; }
+.product-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.product-price { font-size: 12px; color: #888; }
+.try-badge { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; margin-top: 5px; background: #e8f0fe; color: #1a5fb4; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+.modal-bg.open { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 440px; }
+.modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 0.25rem; }
+.modal p { font-size: 13px; color: #888; margin-bottom: 1rem; line-height: 1.5; }
+.modal input { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 10px; outline: none; }
+.modal input:focus { border-color: #1a5fb4; }
+.modal-btns { display: flex; gap: 8px; }
+.modal-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; }
+.btn-cancel { background: #f5f5f3; border: 1px solid #ddd; color: #555; }
+.btn-add { background: #1a5fb4; border: none; color: #fff; }
+.preview-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; margin-bottom: 10px; display: none; background: #f5f5f3; }
+.tryon-wrap { max-width: 1060px; margin: 0 auto 2rem; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+.cam-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #111; border-radius: 16px; overflow: hidden; }
+#video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+#canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #111; padding: 2rem; text-align: center; }
+.cam-overlay h3 { font-size: 20px; color: #fff; font-weight: 700; }
+.cam-overlay p { font-size: 14px; color: #aaa; line-height: 1.6; max-width: 280px; }
+.scan-steps { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 260px; }
+.scan-step { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 8px; }
+.scan-step-num { width: 20px; height: 20px; border-radius: 50%; background: #1a5fb4; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.start-btn { background: #1a5fb4; color: #fff; border: none; padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; max-width: 260px; }
+.start-btn:hover { background: #1450a0; }
+.ai-badge { position: absolute; top: 12px; left: 12px; background: rgba(26,95,180,0.92); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
+.pose-badge { position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
+.pose-badge.detected { background: rgba(30,126,52,0.92); color: #fff; display: block; }
+.pose-badge.searching { background: rgba(180,120,0,0.92); color: #fff; display: block; }
+.pose-badge.error { background: rgba(180,30,30,0.92); color: #fff; display: block; }
+.scan-ring-wrap { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; pointer-events: none; }
+.scan-ring-wrap.show { display: flex; }
+.scan-ring { width: 200px; height: 200px; position: relative; }
+.scan-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.scan-ring-circle { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 6; }
+.scan-ring-progress { fill: none; stroke: #1a5fb4; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 565; stroke-dashoffset: 565; transition: stroke-dashoffset 0.3s; }
+.scan-label { font-size: 14px; color: #fff; font-weight: 600; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+.scan-sublabel { font-size: 12px; color: #aaa; text-align: center; }
+.person-outline { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.person-outline svg { opacity: 0.25; }
+.sidebar { display: flex; flex-direction: column; gap: 14px; }
+.panel { background: #fff; border: 1px solid #e8e8e4; border-radius: 12px; padding: 1rem 1.1rem; }
+.panel-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 10px; }
+.selected-preview { width: 100%; aspect-ratio: 3/4; border-radius: 8px; object-fit: cover; background: #f5f5f3; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #aaa; margin-bottom: 10px; overflow: hidden; }
+.selected-preview img { width: 100%; height: 100%; object-fit: cover; }
+.selected-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.selected-price { font-size: 13px; color: #888; margin-bottom: 10px; }
+.size-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.size-btn { border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; background: #fff; }
+.size-btn.active, .size-btn:hover { border-color: #1a5fb4; color: #1a5fb4; font-weight: 500; }
+.status-box { background: #f5f5f3; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #555; line-height: 1.5; text-align: center; }
+.status-box.live { background: #e8f0fe; color: #1a5fb4; }
+.status-box.detected { background: #e6f4ea; color: #1e7e34; }
+.status-box.error { background: #fce8e8; color: #c0392b; }
+.buy-btn { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.buy-btn:hover { background: #333; }
+.how { background: #1a1a1a; color: #fff; padding: 2.5rem 2rem; text-align: center; margin-top: 1rem; }
+.how h2 { font-size: 22px; font-weight: 600; margin-bottom: 0.4rem; }
+.how-sub { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+.how-steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; max-width: 700px; margin: 0 auto; }
+.how-step-num { width: 32px; height: 32px; border-radius: 50%; background: #1a5fb4; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin: 0 auto 8px; }
+.how-step-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.how-step-desc { font-size: 12px; color: #888; line-height: 1.4; }
+footer { background: #fff; border-top: 1px solid #e8e8e4; padding: 1.25rem 2rem; text-align: center; font-size: 13px; color: #888; }
+footer span { color: #1a5fb4; font-weight: 500; }
+@media(max-width:680px) {
+  .tryon-wrap { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: repeat(2,1fr); }
+  .hero h1 { font-size: 26px; }
+}
 </style>
 </head>
 <body>
-
 <nav>
   <div class="nav-logo">Fit<span>Check</span></div>
-  <div class="nav-badge">AI Powered</div>
+  <div class="nav-badge">AI Powered — Beta</div>
 </nav>
-
 <div class="hero">
-  <h1>Virtual try-on <span>powered by AI</span></h1>
-  <p>Select a clothing item, start your camera, and our AI tracks your body to show you exactly how it looks on you — in real time.</p>
+  <h1>Try real clothes on <span>your body</span></h1>
+  <p>Add any clothing photo from any website, start the 360° body scan, and see it on you in real time using AI.</p>
 </div>
-
-<div class="main">
-  <div style="position:relative;">
+<div class="section">
+  <div class="section-top">
+    <div class="section-title">Clothing catalogue — add your own items</div>
+    <button class="add-btn" onclick="openModal()">+ Add clothing</button>
+  </div>
+  <div class="products" id="products-grid"></div>
+</div>
+<div class="tryon-wrap">
+  <div class="cam-outer">
     <div class="cam-wrap">
       <video id="video" autoplay playsinline muted></video>
       <canvas id="canvas"></canvas>
+      <div class="person-outline">
+        <svg width="160" height="300" viewBox="0 0 160 300">
+          <ellipse cx="80" cy="35" rx="28" ry="32" fill="none" stroke="white" stroke-width="2"/>
+          <line x1="80" y1="67" x2="80" y2="180" stroke="white" stroke-width="2"/>
+          <line x1="80" y1="90" x2="25" y2="150" stroke="white" stroke-width="2"/>
+          <line x1="80" y1="90" x2="135" y2="150" stroke="white" stroke-width="2"/>
+          <line x1="80" y1="180" x2="45" y2="280" stroke="white" stroke-width="2"/>
+          <line x1="80" y1="180" x2="115" y2="280" stroke="white" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="scan-ring-wrap" id="scan-ring-wrap">
+        <div class="scan-ring">
+          <svg viewBox="0 0 200 200">
+            <circle class="scan-ring-circle" cx="100" cy="100" r="90"/>
+            <circle class="scan-ring-progress" id="scan-progress" cx="100" cy="100" r="90"/>
+          </svg>
+        </div>
+        <div class="scan-label" id="scan-label">Stand still — scanning...</div>
+        <div class="scan-sublabel" id="scan-sublabel">Make sure your full body is visible</div>
+      </div>
       <div class="cam-overlay" id="overlay">
-        <h3>AI Body Tracking</h3>
-        <p>Our AI uses Google MediaPipe to detect your body shape and overlay clothing on you in real time — just like Lenskart, but for clothes.</p>
-        <button class="start-btn" onclick="startCamera()">Start Camera</button>
+        <h3>360° Body Scan</h3>
+        <p>Stand 1–2 metres from your camera. Your full body should be visible.</p>
+        <div class="scan-steps">
+          <div class="scan-step"><div class="scan-step-num">1</div>Stand facing the camera</div>
+          <div class="scan-step"><div class="scan-step-num">2</div>Slowly turn in a full circle</div>
+          <div class="scan-step"><div class="scan-step-num">3</div>AI builds your body model</div>
+          <div class="scan-step"><div class="scan-step-num">4</div>Clothes appear on you live</div>
+        </div>
+        <button class="start-btn" onclick="startScan()">Start Body Scan</button>
       </div>
       <div class="ai-badge" id="ai-badge">FitCheck AI</div>
-      <div class="pose-badge" id="pose-badge">Searching...</div>
+      <div class="pose-badge" id="pose-badge"></div>
     </div>
   </div>
-
   <div class="sidebar">
     <div class="panel">
-      <div class="panel-label">Choose item to try</div>
-      <div class="clothes-grid">
-        <div class="cloth-btn active" id="btn-hoodie" onclick="selectCloth('hoodie',this)">
-          <span class="cloth-icon">🧥</span>
-          <div class="cloth-name">Hoodie</div>
-          <div class="cloth-price">$59</div>
-        </div>
-        <div class="cloth-btn" id="btn-tshirt" onclick="selectCloth('tshirt',this)">
-          <span class="cloth-icon">👕</span>
-          <div class="cloth-name">T-Shirt</div>
-          <div class="cloth-price">$29</div>
-        </div>
-        <div class="cloth-btn" id="btn-jacket" onclick="selectCloth('jacket',this)">
-          <span class="cloth-icon">🧣</span>
-          <div class="cloth-name">Jacket</div>
-          <div class="cloth-price">$89</div>
-        </div>
-        <div class="cloth-btn" id="btn-vest" onclick="selectCloth('vest',this)">
-          <span class="cloth-icon">🥼</span>
-          <div class="cloth-name">Vest</div>
-          <div class="cloth-price">$49</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-label">Size</div>
-      <div class="size-row">
+      <div class="panel-label">Selected item</div>
+      <div class="selected-preview" id="selected-preview"><span>No item selected</span></div>
+      <div class="selected-name" id="sel-name">Pick a product above</div>
+      <div class="selected-price" id="sel-price"></div>
+      <div class="size-row" id="size-row" style="display:none;">
         <div class="size-btn" onclick="pickSize(this)">XS</div>
         <div class="size-btn active" onclick="pickSize(this)">S</div>
         <div class="size-btn" onclick="pickSize(this)">M</div>
@@ -126,322 +171,135 @@
         <div class="size-btn" onclick="pickSize(this)">XL</div>
       </div>
     </div>
-
-    <div class="status-box" id="status">Select an item and start camera</div>
-
+    <div class="status-box" id="status">Select a clothing item above to begin</div>
     <div class="panel">
-      <div class="panel-label">AI Status</div>
-      <div style="font-size:13px;color:#555;line-height:1.6;" id="ai-status">
-        Waiting for camera — MediaPipe body tracking will activate once camera starts.
-      </div>
+      <div class="panel-label">Scan status</div>
+      <div style="font-size:13px;color:#555;line-height:1.6;" id="ai-status">Waiting to start — press "Start Body Scan" when ready.</div>
     </div>
-
-    <button class="buy-btn" onclick="alert('Added to cart! In a real integration this connects to the brand store.')">Add to Cart</button>
+    <button class="buy-btn" id="buy-btn" style="display:none;" onclick="alert('Added to cart!')">Add to Cart</button>
   </div>
 </div>
-
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3>Add clothing item</h3>
+    <p>Paste the image URL of any clothing photo from any website (right-click image → Copy image address)</p>
+    <input type="text" id="img-url" placeholder="https://... (paste image URL here)" oninput="previewImg(this.value)"/>
+    <img id="preview-img" class="preview-img" alt="preview"/>
+    <input type="text" id="item-name" placeholder="Name (e.g. Blue Denim Jacket)"/>
+    <input type="text" id="item-price" placeholder="Price (e.g. $79.99)"/>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-add" onclick="addItem()">Add to catalogue</button>
+    </div>
+  </div>
+</div>
 <div class="how">
-  <h2>How it works</h2>
-  <div class="how-sub">Powered by Google MediaPipe AI — just a regular phone camera</div>
+  <h2>How FitCheck works</h2>
+  <div class="how-sub">Real AI body tracking — just a regular phone or laptop camera</div>
   <div class="how-steps">
-    <div>
-      <div class="how-step-num">1</div>
-      <div class="how-step-title">Pick clothing</div>
-      <div class="how-step-desc">Choose any item from the store</div>
-    </div>
-    <div>
-      <div class="how-step-num">2</div>
-      <div class="how-step-title">AI detects you</div>
-      <div class="how-step-desc">MediaPipe finds your shoulders and torso</div>
-    </div>
-    <div>
-      <div class="how-step-num">3</div>
-      <div class="how-step-title">Clothes fit you</div>
-      <div class="how-step-desc">Garment scales and positions to your body</div>
-    </div>
-    <div>
-      <div class="how-step-num">4</div>
-      <div class="how-step-title">Buy confident</div>
-      <div class="how-step-desc">Know it fits — fewer returns</div>
-    </div>
+    <div><div class="how-step-num">1</div><div class="how-step-title">Add clothes</div><div class="how-step-desc">Paste any clothing image URL from any website</div></div>
+    <div><div class="how-step-num">2</div><div class="how-step-title">360° scan</div><div class="how-step-desc">Turn slowly — AI builds your full body model</div></div>
+    <div><div class="how-step-num">3</div><div class="how-step-title">Try it on</div><div class="how-step-desc">Real clothing image fits to your body live</div></div>
+    <div><div class="how-step-num">4</div><div class="how-step-title">Buy confident</div><div class="how-step-desc">Know it fits before you order</div></div>
   </div>
 </div>
-
-<footer>
-  <span>FitCheck</span> — AI virtual try-on prototype &nbsp;&bull;&nbsp; Built for clothing brands &nbsp;&bull;&nbsp; Powered by Google MediaPipe
-</footer>
-
+<footer><span>FitCheck</span> — AI virtual try-on prototype &nbsp;&bull;&nbsp; Built for clothing brands &nbsp;&bull;&nbsp; Powered by Google MediaPipe</footer>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script>
-let currentCloth = 'hoodie';
-let poseDetected = false;
-let landmarks = null;
-let mpCamera = null;
-
-const clothColors = {
-  hoodie:  { main:'#4A90D9', dark:'#2a6aB9', label:'Classic Hoodie — $59' },
-  tshirt:  { main:'#E07B5A', dark:'#c05a3a', label:'Essential Tee — $29' },
-  jacket:  { main:'#4A6A4A', dark:'#2a4a2a', label:'Urban Jacket — $89' },
-  vest:    { main:'#8B6AB5', dark:'#6b4a95', label:'Puffer Vest — $49' }
-};
-
-function selectCloth(name, el) {
-  currentCloth = name;
-  document.querySelectorAll('.cloth-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  setStatus(clothColors[name].label + ' selected', 'live');
+const defaultItems = [
+  { id:1, name:'White Oversized Tee', price:'$29.99', url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', color:'#e0e0e0' },
+  { id:2, name:'Black Hoodie', price:'$59.99', url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80', color:'#222' },
+  { id:3, name:'Denim Jacket', price:'$89.99', url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=400&q=80', color:'#4A6A9A' },
+  { id:4, name:'Beige Trench Coat', price:'$129.99', url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400&q=80', color:'#C4A882' },
+];
+let items=[...defaultItems], selectedItem=null, scanProgress=0, scanInterval=null, scanComplete=false, mpCamera=null;
+function renderCatalogue(){
+  const grid=document.getElementById('products-grid'); grid.innerHTML='';
+  items.forEach(item=>{
+    const card=document.createElement('div');
+    card.className='product-card'+(selectedItem&&selectedItem.id===item.id?' selected':'');
+    card.onclick=()=>selectItem(item,card);
+    card.innerHTML=`<div class="product-img-wrap"><img src="${item.url}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div class="no-img" style="display:none;">👕</div></div><div class="product-info"><div class="product-name">${item.name}</div><div class="product-price">${item.price}</div><span class="try-badge">Try On</span></div>`;
+    grid.appendChild(card);
+  });
 }
-
-function pickSize(el) {
-  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+function selectItem(item,card){
+  selectedItem=item;
+  document.querySelectorAll('.product-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('sel-name').textContent=item.name;
+  document.getElementById('sel-price').textContent=item.price;
+  document.getElementById('size-row').style.display='flex';
+  document.getElementById('buy-btn').style.display='block';
+  const prev=document.getElementById('selected-preview');
+  prev.innerHTML=`<img src="${item.url}" alt="${item.name}" onerror="this.outerHTML='<span>Image not available</span>'"/>`;
+  setStatus(item.name+' selected — start scan!','live');
 }
-
-function setStatus(msg, type) {
-  const s = document.getElementById('status');
-  s.textContent = msg;
-  s.className = 'status-box ' + (type || '');
+function pickSize(el){ document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
+function setStatus(msg,type){ const s=document.getElementById('status'); s.textContent=msg; s.className='status-box '+(type||''); }
+function openModal(){ document.getElementById('modal-bg').classList.add('open'); }
+function closeModal(){ document.getElementById('modal-bg').classList.remove('open'); document.getElementById('img-url').value=''; document.getElementById('item-name').value=''; document.getElementById('item-price').value=''; document.getElementById('preview-img').style.display='none'; }
+function previewImg(url){ const img=document.getElementById('preview-img'); if(url.startsWith('http')){ img.src=url; img.style.display='block'; } else { img.style.display='none'; } }
+function addItem(){ const url=document.getElementById('img-url').value.trim(); const name=document.getElementById('item-name').value.trim()||'My Item'; const price=document.getElementById('item-price').value.trim()||'$0.00'; if(!url){ alert('Please paste an image URL first!'); return; } items.push({id:Date.now(),name,price,url,color:'#888'}); renderCatalogue(); closeModal(); }
+function startScan(){
+  if(!selectedItem){ alert('Please select a clothing item first!'); return; }
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('ai-badge').style.display='block';
+  document.getElementById('scan-ring-wrap').classList.add('show');
+  document.getElementById('pose-badge').className='pose-badge searching';
+  document.getElementById('pose-badge').textContent='Scanning...';
+  setStatus('Scanning your body — turn slowly in a full circle','live');
+  document.getElementById('ai-status').textContent='Slowly turn 360°. Keep your full body visible. The scan takes about 5 seconds.';
+  startProgressRing();
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480},audio:false})
+    .then(stream=>{ const video=document.getElementById('video'); video.srcObject=stream; video.onloadedmetadata=()=>{ startPose(video); }; })
+    .catch(()=>{ document.getElementById('pose-badge').className='pose-badge error'; document.getElementById('pose-badge').textContent='Camera error'; document.getElementById('scan-ring-wrap').classList.remove('show'); document.getElementById('ai-status').textContent='Camera access was denied. Please allow camera access in your browser settings and try again.'; setStatus('Camera access denied — check browser settings','error'); });
 }
-
-function startCamera() {
-  document.getElementById('overlay').style.display = 'none';
-  document.getElementById('ai-badge').style.display = 'block';
-  document.getElementById('pose-badge').className = 'pose-badge searching';
-  document.getElementById('pose-badge').textContent = 'Searching for body...';
-  setStatus('Camera starting — stand back so your full torso is visible', 'live');
-  document.getElementById('ai-status').textContent = 'MediaPipe loading... Stand 1-2 metres from camera with your full torso visible.';
-
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-
-  const pose = new Pose({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
-  pose.setOptions({ modelComplexity: 1, smoothLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-
-  pose.onResults(results => {
-    canvas.width = video.videoWidth || canvas.offsetWidth;
-    canvas.height = video.videoHeight || canvas.offsetHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.save();
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-
-    if (results.poseLandmarks && results.poseLandmarks.length > 0) {
-      landmarks = results.poseLandmarks;
-      poseDetected = true;
-      document.getElementById('pose-badge').className = 'pose-badge detected';
-      document.getElementById('pose-badge').textContent = 'Body detected';
-      document.getElementById('ai-status').textContent = 'Body detected! AI is tracking your shoulders and torso in real time.';
-      setStatus('Body detected — ' + clothColors[currentCloth].label, 'detected');
-      drawClothing(ctx, canvas.width, canvas.height, landmarks);
-    } else {
-      poseDetected = false;
-      document.getElementById('pose-badge').className = 'pose-badge searching';
-      document.getElementById('pose-badge').textContent = 'Searching...';
-      document.getElementById('ai-status').textContent = 'Stand back so your full upper body is visible to the camera.';
-    }
+function startProgressRing(){
+  scanProgress=0; const circle=document.getElementById('scan-progress'); const label=document.getElementById('scan-label'); const circumference=565;
+  const messages=[[0,'Stand facing forward...'],[25,'Turn slowly to your right...'],[50,'Keep turning — halfway there!'],[75,'Almost done — nearly full circle!'],[95,'Scan complete!']];
+  scanInterval=setInterval(()=>{
+    scanProgress+=1;
+    circle.style.strokeDashoffset=circumference-(scanProgress/100)*circumference;
+    const msg=messages.filter(m=>scanProgress>=m[0]).pop();
+    if(msg) label.textContent=msg[1];
+    if(scanProgress>=100){ clearInterval(scanInterval); scanComplete=true; document.getElementById('scan-ring-wrap').classList.remove('show'); document.getElementById('pose-badge').className='pose-badge detected'; document.getElementById('pose-badge').textContent='Scan complete'; document.getElementById('ai-status').textContent='Body scan complete! AI is now tracking your body and overlaying the clothes in real time.'; setStatus('Scan done — '+selectedItem.name+' is on you!','detected'); }
+  },50);
+}
+function startPose(video){
+  const canvas=document.getElementById('canvas');
+  const pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
+  pose.setOptions({modelComplexity:1,smoothLandmarks:true,minDetectionConfidence:0.55,minTrackingConfidence:0.55});
+  pose.onResults(results=>{
+    canvas.width=video.videoWidth||canvas.offsetWidth; canvas.height=video.videoHeight||canvas.offsetHeight;
+    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.save(); ctx.translate(canvas.width,0); ctx.scale(-1,1);
+    ctx.drawImage(results.image,0,0,canvas.width,canvas.height);
+    if(results.poseLandmarks&&results.poseLandmarks.length>0&&scanComplete){ drawClothingOnBody(ctx,canvas.width,canvas.height,results.poseLandmarks); document.getElementById('pose-badge').className='pose-badge detected'; document.getElementById('pose-badge').textContent='Body tracked'; }
+    else if(scanComplete){ document.getElementById('pose-badge').className='pose-badge searching'; document.getElementById('pose-badge').textContent='Finding body...'; }
     ctx.restore();
   });
-
-  mpCamera = new Camera(video, {
-    onFrame: async () => { await pose.send({ image: video }); },
-    width: 640, height: 480
-  });
+  mpCamera=new Camera(video,{onFrame:async()=>{await pose.send({image:video});},width:640,height:480});
   mpCamera.start();
 }
-
-function drawClothing(ctx, w, h, lm) {
-  const c = clothColors[currentCloth];
-
-  // Get key landmarks (mirrored because we flip canvas)
-  const lShoulder = lm[11];
-  const rShoulder = lm[12];
-  const lHip = lm[23];
-  const rHip = lm[24];
-
-  if (!lShoulder || !rShoulder || !lHip || !rHip) return;
-
-  // Convert normalised coords to pixels (mirrored)
-  const lsx = (1 - lShoulder.x) * w, lsy = lShoulder.y * h;
-  const rsx = (1 - rShoulder.x) * w, rsy = rShoulder.y * h;
-  const lhx = (1 - lHip.x) * w,     lhy = lHip.y * h;
-  const rhx = (1 - rHip.x) * w,     rhy = rHip.y * h;
-
-  const shoulderW = Math.abs(rsx - lsx);
-  const torsoH = ((lhy + rhy) / 2) - ((lsy + rsy) / 2);
-  const cx = (lsx + rsx) / 2;
-  const cy = (lsy + rsy) / 2;
-
-  const pw = shoulderW * 1.55;
-  const ph = torsoH * 1.15;
-  const px = cx - pw / 2;
-  const py = cy - ph * 0.08;
-
-  ctx.globalAlpha = 0.82;
-
-  if (currentCloth === 'hoodie') {
-    drawHoodie(ctx, px, py, pw, ph, c.main, c.dark, lsx, lsy, rsx, rsy);
-  } else if (currentCloth === 'tshirt') {
-    drawTshirt(ctx, px, py, pw, ph, c.main, c.dark, lsx, lsy, rsx, rsy);
-  } else if (currentCloth === 'jacket') {
-    drawJacket(ctx, px, py, pw, ph, c.main, c.dark, lsx, lsy, rsx, rsy);
-  } else if (currentCloth === 'vest') {
-    drawVest(ctx, px, py, pw, ph, c.main, c.dark);
-  }
-
-  ctx.globalAlpha = 1;
+const imgCache={};
+function getImg(url){ if(!imgCache[url]){ const img=new Image(); img.crossOrigin='anonymous'; img.src=url; imgCache[url]=img; } return imgCache[url]; }
+function drawClothingOnBody(ctx,w,h,lm){
+  if(!selectedItem) return;
+  const lS=lm[11],rS=lm[12],lH=lm[23],rH=lm[24];
+  if(!lS||!rS||!lH||!rH) return;
+  const lsx=(1-lS.x)*w, lsy=lS.y*h, rsx=(1-rS.x)*w, rsy=rS.y*h;
+  const lhy=lH.y*h, rhy=rH.y*h;
+  const shoulderW=Math.abs(rsx-lsx), torsoH=((lhy+rhy)/2)-((lsy+rsy)/2);
+  const cx=(lsx+rsx)/2, topY=((lsy+rsy)/2)-torsoH*0.12;
+  const drawW=shoulderW*1.7, drawH=torsoH*1.5;
+  const drawX=cx-drawW/2, drawY=topY-drawH*0.05;
+  const img=getImg(selectedItem.url);
+  if(img.complete&&img.naturalWidth>0){ ctx.globalAlpha=0.88; ctx.drawImage(img,drawX,drawY,drawW,drawH); ctx.globalAlpha=1; }
+  else { ctx.fillStyle=selectedItem.color||'#4A90D9'; ctx.globalAlpha=0.6; ctx.beginPath(); ctx.roundRect(drawX,drawY,drawW,drawH,8); ctx.fill(); ctx.globalAlpha=1; }
 }
-
-function drawHoodie(ctx, x, y, w, h, main, dark, lsx, lsy, rsx, rsy) {
-  const sleeveW = w * 0.22;
-  const sleeveH = h * 0.65;
-  // Left sleeve
-  ctx.fillStyle = main;
-  ctx.beginPath();
-  ctx.moveTo(x, y + h * 0.1);
-  ctx.lineTo(x - sleeveW, lsy + sleeveH);
-  ctx.lineTo(x - sleeveW * 0.3, lsy + sleeveH);
-  ctx.lineTo(x + w * 0.12, y + h * 0.25);
-  ctx.closePath(); ctx.fill();
-  // Right sleeve
-  ctx.beginPath();
-  ctx.moveTo(x + w, y + h * 0.1);
-  ctx.lineTo(x + w + sleeveW, rsy + sleeveH);
-  ctx.lineTo(x + w + sleeveW * 0.3, rsy + sleeveH);
-  ctx.lineTo(x + w * 0.88, y + h * 0.25);
-  ctx.closePath(); ctx.fill();
-  // Body
-  ctx.fillStyle = main;
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.08, y);
-  ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.05, x + w * 0.92, y);
-  ctx.lineTo(x + w, y + h * 0.1);
-  ctx.lineTo(x + w * 0.88, y + h * 0.25);
-  ctx.lineTo(x + w * 0.85, y + h);
-  ctx.lineTo(x + w * 0.15, y + h);
-  ctx.lineTo(x + w * 0.12, y + h * 0.25);
-  ctx.lineTo(x, y + h * 0.1);
-  ctx.closePath(); ctx.fill();
-  // Hood
-  ctx.fillStyle = dark;
-  ctx.beginPath();
-  ctx.arc(x + w * 0.5, y + h * 0.01, w * 0.14, 0, Math.PI * 2);
-  ctx.fill();
-  // Pocket line
-  ctx.strokeStyle = dark; ctx.lineWidth = 2; ctx.globalAlpha = 0.4;
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.25, y + h * 0.7);
-  ctx.lineTo(x + w * 0.75, y + h * 0.7);
-  ctx.stroke(); ctx.globalAlpha = 0.82;
-}
-
-function drawTshirt(ctx, x, y, w, h, main, dark, lsx, lsy, rsx, rsy) {
-  const sleeveW = w * 0.18;
-  const sleeveH = h * 0.3;
-  ctx.fillStyle = main;
-  // Left sleeve
-  ctx.beginPath();
-  ctx.moveTo(x, y + h * 0.08);
-  ctx.lineTo(x - sleeveW, y + sleeveH);
-  ctx.lineTo(x - sleeveW * 0.2, y + sleeveH + h * 0.05);
-  ctx.lineTo(x + w * 0.12, y + h * 0.22);
-  ctx.closePath(); ctx.fill();
-  // Right sleeve
-  ctx.beginPath();
-  ctx.moveTo(x + w, y + h * 0.08);
-  ctx.lineTo(x + w + sleeveW, y + sleeveH);
-  ctx.lineTo(x + w + sleeveW * 0.2, y + sleeveH + h * 0.05);
-  ctx.lineTo(x + w * 0.88, y + h * 0.22);
-  ctx.closePath(); ctx.fill();
-  // Body
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.1, y);
-  ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.04, x + w * 0.9, y);
-  ctx.lineTo(x + w, y + h * 0.08);
-  ctx.lineTo(x + w * 0.88, y + h * 0.22);
-  ctx.lineTo(x + w * 0.84, y + h);
-  ctx.lineTo(x + w * 0.16, y + h);
-  ctx.lineTo(x + w * 0.12, y + h * 0.22);
-  ctx.lineTo(x, y + h * 0.08);
-  ctx.closePath(); ctx.fill();
-  // Collar
-  ctx.fillStyle = dark;
-  ctx.beginPath();
-  ctx.ellipse(x + w * 0.5, y + h * 0.03, w * 0.12, h * 0.05, 0, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function drawJacket(ctx, x, y, w, h, main, dark, lsx, lsy, rsx, rsy) {
-  const sleeveW = w * 0.23;
-  const sleeveH = h * 0.7;
-  ctx.fillStyle = main;
-  // Left sleeve
-  ctx.beginPath();
-  ctx.moveTo(x, y + h * 0.1);
-  ctx.lineTo(x - sleeveW, lsy + sleeveH);
-  ctx.lineTo(x - sleeveW * 0.3, lsy + sleeveH + h * 0.03);
-  ctx.lineTo(x + w * 0.1, y + h * 0.28);
-  ctx.closePath(); ctx.fill();
-  // Right sleeve
-  ctx.beginPath();
-  ctx.moveTo(x + w, y + h * 0.1);
-  ctx.lineTo(x + w + sleeveW, rsy + sleeveH);
-  ctx.lineTo(x + w + sleeveW * 0.3, rsy + sleeveH + h * 0.03);
-  ctx.lineTo(x + w * 0.9, y + h * 0.28);
-  ctx.closePath(); ctx.fill();
-  // Body
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.07, y - h * 0.02);
-  ctx.lineTo(x + w * 0.93, y - h * 0.02);
-  ctx.lineTo(x + w, y + h * 0.1);
-  ctx.lineTo(x + w * 0.9, y + h * 0.28);
-  ctx.lineTo(x + w * 0.86, y + h * 1.02);
-  ctx.lineTo(x + w * 0.14, y + h * 1.02);
-  ctx.lineTo(x + w * 0.1, y + h * 0.28);
-  ctx.lineTo(x, y + h * 0.1);
-  ctx.closePath(); ctx.fill();
-  // Zip line
-  ctx.strokeStyle = dark; ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.5, y); ctx.lineTo(x + w * 0.5, y + h); ctx.stroke();
-  // Collar
-  ctx.fillStyle = dark; ctx.globalAlpha = 0.9;
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.35, y - h * 0.02);
-  ctx.lineTo(x + w * 0.5, y + h * 0.12);
-  ctx.lineTo(x + w * 0.65, y - h * 0.02);
-  ctx.closePath(); ctx.fill();
-  ctx.globalAlpha = 0.82;
-}
-
-function drawVest(ctx, x, y, w, h, main, dark) {
-  ctx.fillStyle = main;
-  // Body no sleeves
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.18, y);
-  ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.04, x + w * 0.82, y);
-  ctx.lineTo(x + w * 0.88, y + h * 0.15);
-  ctx.lineTo(x + w * 0.84, y + h);
-  ctx.lineTo(x + w * 0.16, y + h);
-  ctx.lineTo(x + w * 0.12, y + h * 0.15);
-  ctx.closePath(); ctx.fill();
-  // Collar
-  ctx.fillStyle = dark;
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.35, y);
-  ctx.lineTo(x + w * 0.5, y + h * 0.14);
-  ctx.lineTo(x + w * 0.65, y);
-  ctx.closePath(); ctx.fill();
-  // Zip
-  ctx.strokeStyle = dark; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.5;
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.5, y + h * 0.05);
-  ctx.lineTo(x + w * 0.5, y + h);
-  ctx.stroke(); ctx.globalAlpha = 0.82;
-}
+renderCatalogue();
 </script>
 </body>
 </html>
