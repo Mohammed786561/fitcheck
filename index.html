@@ -15,41 +15,71 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 .nav-logo{font-family:'Playfair Display',serif;font-size:21px;font-weight:600}
 .nav-logo span{color:var(--blu)}
 .nav-right{display:flex;gap:10px}
-.nib{background:none;border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:background .15s;position:relative}
-.nib:hover{background:var(--g1)}
+.nib{background:none;border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;position:relative}
 .cdot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--blu);border-radius:50%;border:2px solid var(--wht)}
-.media-wrap{background:var(--g1);position:relative}
-.media-inner{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#0a0a12}
+.media-wrap{position:relative}
+.media-inner{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#0a0a14}
 .swiper{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .swiper::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;height:100%;scroll-snap-align:start;overflow:hidden}
-.slide img{width:100%;height:100%;object-fit:cover;transition:transform .5s;display:block}
-.viewer3d{display:none;position:absolute;inset:0}
-.viewer3d.show{display:block}
-#tc{width:100%!important;height:100%!important;display:block;touch-action:none;outline:none}
+.slide img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── 3D VIEWER using CSS 3D — no library needed, loads instantly ── */
+.viewer3d{display:none;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#1a1a2e 0%,#0a0a14 70%);cursor:grab;user-select:none;touch-action:none;overflow:hidden}
+.viewer3d.show{display:flex;align-items:center;justify-content:center}
+.viewer3d:active{cursor:grabbing}
+.scene{width:220px;height:300px;position:relative;transform-style:preserve-3d;perspective:900px;will-change:transform}
+.cloth3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:none;will-change:transform}
+
+/* Clothing panels */
+.panel{position:absolute;backface-visibility:hidden;border-radius:4px;overflow:hidden}
+.front{width:220px;height:280px;left:0;top:0;transform:translateZ(28px)}
+.back{width:220px;height:280px;left:0;top:0;transform:rotateY(180deg) translateZ(28px)}
+.left-side{width:56px;height:280px;left:-28px;top:0;transform:rotateY(-90deg) translateZ(0px);background:rgba(0,0,0,.4)}
+.right-side{width:56px;height:280px;right:-28px;top:0;transform:rotateY(90deg) translateZ(0px);background:rgba(0,0,0,.35)}
+.top-panel{width:220px;height:56px;left:0;top:-28px;transform:rotateX(90deg) translateZ(0px);background:rgba(0,0,0,.3)}
+.bottom-panel{width:220px;height:56px;left:0;bottom:-28px;transform:rotateX(-90deg) translateZ(0px);background:rgba(0,0,0,.25)}
+
+/* Sleeves */
+.sleeve-l{position:absolute;width:70px;height:160px;transform-style:preserve-3d;left:-70px;top:10px}
+.sleeve-r{position:absolute;width:70px;height:160px;transform-style:preserve-3d;right:-70px;top:10px}
+.sl-front{position:absolute;width:70px;height:160px;transform:translateZ(18px);border-radius:4px;overflow:hidden}
+.sl-back{position:absolute;width:70px;height:160px;transform:rotateY(180deg) translateZ(18px);border-radius:4px}
+.sl-side{position:absolute;width:36px;height:160px;top:0}
+.sl-side-l{left:-18px;transform:rotateY(-90deg) translateZ(0)}
+.sl-side-r{right:-18px;transform:rotateY(90deg) translateZ(0)}
+
+/* Hood/collar */
+.hood{position:absolute;width:140px;height:80px;left:40px;top:-60px;transform-style:preserve-3d}
+.hood-f{position:absolute;width:140px;height:80px;transform:translateZ(20px) rotateX(-20deg);border-radius:50% 50% 0 0;overflow:hidden}
+.hood-b{position:absolute;width:140px;height:80px;transform:rotateY(180deg) translateZ(20px) rotateX(-20deg);border-radius:50% 50% 0 0}
+
+/* 3D UI */
 .v3ui{position:absolute;inset:0;pointer-events:none;z-index:5}
 .v3deg{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:4px 13px;border-radius:100px;pointer-events:all;letter-spacing:.04em}
-.v3hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:500;padding:6px 16px;border-radius:100px;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .5s;pointer-events:none}
+.v3hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:500;padding:6px 16px;border-radius:100px;white-space:nowrap;transition:opacity .5s;pointer-events:none}
 .v3hint.gone{opacity:0}
-.v3reset{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:600;padding:6px 13px;border-radius:100px;cursor:pointer;pointer-events:all;transition:background .15s}
-.v3reset:hover{background:rgba(255,255,255,.25)}
-.v3zoom{position:absolute;right:12px;bottom:48px;display:flex;flex-direction:column;gap:6px;pointer-events:all}
-.v3zb{width:34px;height:34px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.v3zb:hover{background:rgba(255,255,255,.25)}
-.v3load{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0a0a12;z-index:10}
-.v3load.done{display:none}
-.v3spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--blu);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.v3ltxt{color:rgba(255,255,255,.55);font-size:12px;font-weight:500;letter-spacing:.03em}
+.v3reset{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:600;padding:6px 13px;border-radius:100px;cursor:pointer;pointer-events:all}
+.v3zoom{position:absolute;right:12px;bottom:44px;display:flex;flex-direction:column;gap:6px;pointer-events:all}
+.v3zb{width:34px;height:34px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* Floor reflection */
+.floor-refl{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:160px;height:20px;background:radial-gradient(ellipse,rgba(255,255,255,.12) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+
+/* Dots */
 .mdots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;pointer-events:none}
 .mdot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.2);transition:all .25s}
 .mdot.on{background:var(--blk);width:18px;border-radius:3px}
+
+/* Tabs */
 .tabs{display:flex;background:#fff;border-bottom:1px solid var(--g2);padding:0 .7rem}
 .tab{flex:1;padding:11px 4px 9px;font-size:11.5px;font-weight:500;text-align:center;cursor:pointer;color:var(--g4);border-bottom:2.5px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
 .tab svg{width:17px;height:17px}
 .tab.on{color:var(--blk);border-bottom-color:var(--blk)}
 .tab.ar-tab{background:var(--blu);color:#fff;border-radius:10px 10px 0 0;margin-top:5px;padding-top:7px;border-bottom-color:transparent!important}
 .tab.ar-tab:hover{background:var(--blu2)}
+
+/* Product info */
 .pinfo{padding:1rem 1rem .5rem;background:#fff}
 .brand{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--g4);margin-bottom:4px}
 .ptitle{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;line-height:1.18;margin-bottom:8px}
@@ -85,10 +115,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 .bbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,248,.97);backdrop-filter:blur(24px);border-top:1px solid var(--g2);padding:10px 1rem 18px;display:flex;gap:10px;z-index:60}
 .bwish{width:48px;height:48px;border:1.5px solid var(--g2);border-radius:8px;background:#fff;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
 .bwish.on{border-color:var(--red);color:var(--red)}
-.bcart{flex:1;height:48px;background:var(--blk);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
-.bcart:hover{background:#222}
-.barb{width:48px;height:48px;background:var(--blu);border:none;border-radius:8px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
-.barb:hover{background:var(--blu2)}.barb svg{width:20px;height:20px}
+.bcart{flex:1;height:48px;background:var(--blk);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+.barb{width:48px;height:48px;background:var(--blu);border:none;border-radius:8px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.barb svg{width:20px;height:20px}
+
 /* AR */
 .arscr{position:fixed;inset:0;background:#000;z-index:999;display:none;flex-direction:column;max-width:430px;margin:0 auto}
 .arscr.open{display:flex;animation:fuIn .25s ease}
@@ -138,6 +168,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 </style>
 </head>
 <body>
+
 <nav class="nav">
   <button class="nav-back">←</button>
   <div class="nav-logo">Fit<span>Check</span></div>
@@ -149,29 +180,53 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 
 <div class="media-wrap">
   <div class="media-inner">
+    <!-- PHOTOS -->
     <div class="swiper" id="swiper">
       <div class="slide"><img id="s0" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
       <div class="slide"><img id="s1" src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90" alt=""/></div>
       <div class="slide"><img id="s2" src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90" alt=""/></div>
     </div>
 
-    <!-- 3D VIEWER — just the clothing floating in space -->
+    <!-- 3D VIEWER — CSS 3D, loads instantly, no library -->
     <div class="viewer3d" id="viewer3d">
-      <canvas id="tc"></canvas>
-      <div class="v3load" id="v3load">
-        <div class="v3spin"></div>
-        <div class="v3ltxt">Loading 3D view...</div>
+      <div class="scene" id="scene3d">
+        <div class="cloth3d" id="cloth3d">
+          <!-- Main body -->
+          <div class="panel front" id="front-panel" style="background:#222"></div>
+          <div class="panel back" id="back-panel" style="background:#1a1a1a"></div>
+          <div class="panel left-side" id="left-panel"></div>
+          <div class="panel right-side" id="right-panel"></div>
+          <div class="panel top-panel" id="top-panel"></div>
+          <div class="panel bottom-panel" id="bot-panel"></div>
+          <!-- Left sleeve -->
+          <div class="sleeve-l" id="sleeve-l">
+            <div class="sl-front" id="sl-lf"></div>
+            <div class="sl-back" id="sl-lb"></div>
+            <div class="sl-side sl-side-l" id="sl-ll"></div>
+            <div class="sl-side sl-side-r" id="sl-lr"></div>
+          </div>
+          <!-- Right sleeve -->
+          <div class="sleeve-r" id="sleeve-r">
+            <div class="sl-front" id="sl-rf"></div>
+            <div class="sl-back" id="sl-rb"></div>
+            <div class="sl-side sl-side-l" id="sl-rl"></div>
+            <div class="sl-side sl-side-r" id="sl-rr"></div>
+          </div>
+          <!-- Hood -->
+          <div class="hood" id="hood">
+            <div class="hood-f" id="hood-f"></div>
+            <div class="hood-b" id="hood-b"></div>
+          </div>
+        </div>
       </div>
+      <div class="floor-refl"></div>
       <div class="v3ui">
         <button class="v3reset" onclick="reset3D()">⟳ Reset</button>
         <div class="v3deg" id="v3deg">0°</div>
-        <div class="v3hint" id="v3hint">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3"/></svg>
-          Drag to rotate · Pinch to zoom
-        </div>
+        <div class="v3hint" id="v3hint">👆 Drag to rotate · Pinch to zoom</div>
         <div class="v3zoom">
-          <button class="v3zb" onclick="z3(1.15)">+</button>
-          <button class="v3zb" onclick="z3(0.87)">−</button>
+          <button class="v3zb" onclick="zoomCloth(1.1)">+</button>
+          <button class="v3zb" onclick="zoomCloth(0.9)">−</button>
         </div>
       </div>
     </div>
@@ -234,8 +289,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
         <line x1="70" y1="61" x2="70" y2="165"/><line x1="70" y1="88" x2="18" y2="140"/>
         <line x1="70" y1="88" x2="122" y2="140"/><line x1="70" y1="165" x2="42" y2="260"/>
         <line x1="70" y1="165" x2="98" y2="260"/>
-        <line x1="18" y1="80" x2="122" y2="80" stroke-dasharray="4 4" stroke-opacity=".3"/>
-        <line x1="36" y1="155" x2="104" y2="155" stroke-dasharray="4 4" stroke-opacity=".3"/>
       </svg>
     </div>
     <div class="arstat" id="arstat">Starting camera...</div>
@@ -261,17 +314,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--wht);color:var(--blk);max
 <div class="flash" id="flash"></div>
 <div class="toast" id="toastEl"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script>
 const ITEMS=[
-  {id:1,name:'Black Premium Hoodie',price:'$59.99',url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90',color:'#1a1a1a',hex:0x222222,cname:'Jet Black',type:'hoodie'},
-  {id:2,name:'White Essential Tee',price:'$29.99',url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90',color:'#f0f0ee',hex:0xeeeeee,cname:'Pure White',type:'tshirt'},
-  {id:3,name:'Indigo Denim Jacket',price:'$89.99',url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90',color:'#3a5a8a',hex:0x3a5a8a,cname:'Indigo Blue',type:'jacket'},
-  {id:4,name:'Camel Trench Coat',price:'$129.99',url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90',color:'#c4a57a',hex:0xc4a57a,cname:'Camel',type:'coat'},
-  {id:5,name:'Ash Grey Sweatshirt',price:'$49.99',url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90',color:'#8a8a86',hex:0x8a8a86,cname:'Ash Grey',type:'hoodie'},
-  {id:6,name:'Navy Polo',price:'$39.99',url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90',color:'#1a2f5a',hex:0x1a2f5a,cname:'Navy',type:'tshirt'},
+  {id:1,name:'Black Premium Hoodie',price:'$59.99',url:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=90',color:'#1a1a1a',cname:'Jet Black',type:'hoodie'},
+  {id:2,name:'White Essential Tee',price:'$29.99',url:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=90',color:'#f0f0ee',cname:'Pure White',type:'tshirt'},
+  {id:3,name:'Indigo Denim Jacket',price:'$89.99',url:'https://images.unsplash.com/photo-1601333144130-8cbb312386b6?w=800&q=90',color:'#3a5a8a',cname:'Indigo Blue',type:'jacket'},
+  {id:4,name:'Camel Trench Coat',price:'$129.99',url:'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=90',color:'#c4a57a',cname:'Camel',type:'coat'},
+  {id:5,name:'Ash Grey Sweatshirt',price:'$49.99',url:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=90',color:'#8a8a86',cname:'Ash Grey',type:'hoodie'},
+  {id:6,name:'Navy Polo',price:'$39.99',url:'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=90',color:'#1a2f5a',cname:'Navy',type:'tshirt'},
 ];
 
 let SEL=ITEMS[0],mpCam=null,facing='user',scanDone=false;
@@ -279,11 +331,11 @@ const CACHE={};
 let smX=0,smY=0,smW=0,smH=0,smA=0;
 const SM=0.18;
 
-// Three.js
-let renderer,scene,camera,animId,threeReady=false;
-let clothGroup=null;
-const orb={theta:0.4,phi:1.3,r:2.8,drag:false,lx:0,ly:0,vt:0,vp:0,pinch:false,pd:0};
-const TARGET=new THREE.Vector3(0,0,0);
+// 3D state
+let rotX=-15,rotY=20,rotZ=0,clothScale=1;
+let dragging=false,lastX=0,lastY=0,velX=0,velY=0;
+let autoRotate=true,autoRaf=null,floatY=0,floatT=0;
+let pinching=false,pinchDist=0;
 
 function init(){
   renderRelated();renderThumbs();renderColours();
@@ -301,7 +353,7 @@ function selectItem(item){
   document.getElementById('arname').textContent=item.name;
   document.querySelectorAll('.slide img').forEach(i=>i.src=item.url);
   smX=smY=smW=smH=0;
-  if(threeReady)buildCloth();
+  update3DCloth();
   renderRelated();renderThumbs();renderColours();
   preload(item.url);
 }
@@ -347,313 +399,177 @@ function initSwiper(){
 }
 
 // ════════════════════════════════════
-// THREE.JS — JUST THE CLOTHING in 3D
-// No person, no mannequin
-// Looks like Nike shoe viewer
+// CSS 3D CLOTHING — Instant, no library
+// Pure CSS transforms = loads in milliseconds
 // ════════════════════════════════════
-function init3D(){
-  if(threeReady)return;
-  const cont=document.getElementById('viewer3d');
-  const canvas=document.getElementById('tc');
-  const W=cont.offsetWidth,H=cont.offsetHeight;
+function update3DCloth(){
+  const c=SEL.color;
+  const dark=darken(c,0.65);
+  const darker=darken(c,0.45);
+  const isHoodie=SEL.type==='hoodie';
+  const isTshirt=SEL.type==='tshirt';
+  const isCoat=SEL.type==='coat';
 
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
-  renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;
-  renderer.setClearColor(0x0a0a12,1);
+  // Front panel — real clothing photo
+  const fp=document.getElementById('front-panel');
+  fp.style.background=`url(${SEL.url}) center/cover no-repeat`;
+  fp.style.boxShadow=`inset -20px 0 40px rgba(0,0,0,.25), inset 20px 0 40px rgba(0,0,0,.15)`;
 
-  scene=new THREE.Scene();
+  // Back panel
+  setColor('back-panel',dark);
+  // Sides
+  setColor('left-panel',darker);
+  setColor('right-panel',darker);
+  setColor('top-panel',dark);
+  setColor('bot-panel',darker);
 
-  // Elegant dark background with subtle gradient feel
-  scene.background=new THREE.Color(0x0a0a12);
-  scene.fog=new THREE.FogExp2(0x0a0a12,0.12);
-
-  camera=new THREE.PerspectiveCamera(38,W/H,0.1,50);
-  updateCam();
-
-  // Studio lighting — like a fashion photo shoot
-  const ambient=new THREE.AmbientLight(0xffffff,0.5);
-  scene.add(ambient);
-
-  // Main key light — warm from top left
-  const key=new THREE.DirectionalLight(0xfff8f0,2.0);
-  key.position.set(-2,4,3);
-  key.castShadow=true;
-  key.shadow.mapSize.set(2048,2048);
-  scene.add(key);
-
-  // Fill light — cool from right
-  const fill=new THREE.DirectionalLight(0xd0e8ff,0.8);
-  fill.position.set(3,1,-1);
-  scene.add(fill);
-
-  // Rim light — dramatic from behind
-  const rim=new THREE.DirectionalLight(0xffffff,1.0);
-  rim.position.set(0,2,-4);
-  scene.add(rim);
-
-  // Subtle point light below — bounce light
-  const bounce=new THREE.PointLight(0x4466ff,0.4,6);
-  bounce.position.set(0,-1.5,1);
-  scene.add(bounce);
-
-  // Subtle floor reflection plane
-  const floorGeo=new THREE.PlaneGeometry(6,6);
-  const floorMat=new THREE.MeshLambertMaterial({
-    color:0x111122,transparent:true,opacity:0.6
+  // Sleeves
+  ['sl-lf','sl-rf'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.background=dark;
+    el.style.boxShadow=`inset -8px 0 20px rgba(0,0,0,.3)`;
   });
-  const floor=new THREE.Mesh(floorGeo,floorMat);
-  floor.rotation.x=-Math.PI/2;
-  floor.position.y=-1.1;
-  floor.receiveShadow=true;
-  scene.add(floor);
+  ['sl-lb','sl-rb','sl-ll','sl-lr','sl-rl','sl-rr'].forEach(id=>setColor(id,darker));
 
-  // Soft shadow disc under clothing
-  const shadowGeo=new THREE.EllipseGeometry(0.5,0.25,32);
-  const shadowMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.4,side:THREE.DoubleSide});
-  const shadowDisc=new THREE.Mesh(shadowGeo,shadowMat);
-  shadowDisc.rotation.x=-Math.PI/2;
-  shadowDisc.position.y=-1.09;
-  scene.add(shadowDisc);
-
-  // Build the clothing
-  buildCloth();
-
-  // Orbit controls
-  setupOrbit(canvas);
-
-  threeReady=true;
-  document.getElementById('v3load').classList.add('done');
-  animate3D();
-  setTimeout(()=>document.getElementById('v3hint').classList.add('gone'),4000);
-
-  window.addEventListener('resize',()=>{
-    if(!renderer)return;
-    const W2=cont.offsetWidth,H2=cont.offsetHeight;
-    renderer.setSize(W2,H2);camera.aspect=W2/H2;camera.updateProjectionMatrix();
-  });
-}
-
-// ── BUILD CLOTHING — proper 3D garment shape ──
-function buildCloth(){
-  // Remove old
-  if(clothGroup){scene.remove(clothGroup);}
-  clothGroup=new THREE.Group();
-
-  const type=SEL.type||'hoodie';
-  const col=new THREE.Color(SEL.hex);
-  const darkCol=new THREE.Color(SEL.hex).multiplyScalar(0.7);
-  const loader=new THREE.TextureLoader();
-  loader.crossOrigin='anonymous';
-
-  // ── Materials ──
-  const mainMat=new THREE.MeshLambertMaterial({color:col,side:THREE.DoubleSide});
-  const darkMat=new THREE.MeshLambertMaterial({color:darkCol,side:THREE.DoubleSide});
-
-  // Apply photo texture to front panel
-  loader.load(SEL.url,(tex)=>{
-    tex.encoding=THREE.sRGBEncoding;
-    // Front panel only gets the texture
-    if(clothGroup.children[0]){
-      clothGroup.children[0].material=new THREE.MeshLambertMaterial({map:tex,side:THREE.FrontSide});
-    }
-  });
-
-  if(type==='hoodie'||type==='tshirt'||type==='jacket'||type==='coat'){
-    buildShirt(clothGroup,mainMat,darkMat,type);
-  }
-
-  // Float it nicely in center
-  clothGroup.position.set(0,0,0);
-  scene.add(clothGroup);
-
-  // Small floating animation
-  floatAnim();
-}
-
-function buildShirt(group,mainMat,darkMat,type){
-  const isLong=(type==='coat'||type==='jacket');
-  const bodyH=isLong?2.2:1.4;
-  const bodyW=1.0;
-  const bodyD=0.35;
-
-  // ── FRONT PANEL (gets the texture) ──
-  const frontGeo=new THREE.PlaneGeometry(bodyW,bodyH,2,4);
-  const front=new THREE.Mesh(frontGeo,mainMat.clone());
-  front.position.set(0,0,bodyD/2+0.001);
-  group.add(front);
-
-  // ── BACK PANEL ──
-  const backGeo=new THREE.PlaneGeometry(bodyW,bodyH,2,4);
-  const back=new THREE.Mesh(backGeo,mainMat);
-  back.position.set(0,0,-bodyD/2);
-  back.rotation.y=Math.PI;
-  group.add(back);
-
-  // ── SIDES — curved for volume ──
-  const sideGeo=new THREE.PlaneGeometry(bodyD,bodyH,1,4);
-  const lSide=new THREE.Mesh(sideGeo,darkMat);
-  lSide.position.set(-bodyW/2,0,0);lSide.rotation.y=-Math.PI/2;
-  group.add(lSide);
-  const rSide=new THREE.Mesh(sideGeo,darkMat);
-  rSide.position.set(bodyW/2,0,0);rSide.rotation.y=Math.PI/2;
-  group.add(rSide);
-
-  // ── SHOULDERS ──
-  const shoulderGeo=new THREE.PlaneGeometry(bodyW,bodyD,2,1);
-  const topShould=new THREE.Mesh(shoulderGeo,darkMat);
-  topShould.position.set(0,bodyH/2,0);topShould.rotation.x=-Math.PI/2;
-  group.add(topShould);
-
-  // ── SLEEVES ──
-  const sleeveLen=type==='tshirt'?0.3:0.7;
-  const sleeveW=0.22;
-  const sleeveD=0.2;
-
-  // Left sleeve
-  const lSleeveGrp=new THREE.Group();
-  const lSlF=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveW),darkMat.clone());
-  lSleeveGrp.add(lSlF);
-  const lSlB=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveW),darkMat);
-  lSlB.rotation.y=Math.PI;lSlB.position.z=-sleeveD;
-  lSleeveGrp.add(lSlB);
-  const lSlT=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveD),darkMat);
-  lSlT.rotation.x=-Math.PI/2;lSlT.position.y=sleeveW/2;lSlT.position.z=-sleeveD/2;
-  lSleeveGrp.add(lSlT);
-  const lSlBo=new THREE.Mesh(new THREE.PlaneGeometry(sleeveLen,sleeveD),darkMat);
-  lSlBo.rotation.x=Math.PI/2;lSlBo.position.y=-sleeveW/2;lSlBo.position.z=-sleeveD/2;
-  lSleeveGrp.add(lSlBo);
-  lSleeveGrp.position.set(-(bodyW/2+sleeveLen/2),bodyH/2-sleeveW/2-0.02,-sleeveD/2);
-  lSleeveGrp.rotation.z=-0.15;
-  group.add(lSleeveGrp);
-
-  // Right sleeve
-  const rSleeveGrp=lSleeveGrp.clone();
-  rSleeveGrp.position.set(bodyW/2+sleeveLen/2,bodyH/2-sleeveW/2-0.02,-sleeveD/2);
-  rSleeveGrp.rotation.z=0.15;
-  group.add(rSleeveGrp);
-
-  // ── COLLAR ──
-  if(type==='hoodie'){
-    // Hood
-    const hoodGeo=new THREE.TorusGeometry(0.28,0.08,8,16,Math.PI);
-    const hood=new THREE.Mesh(hoodGeo,darkMat);
-    hood.position.set(0,bodyH/2+0.15,0);hood.rotation.x=-Math.PI/2;
-    group.add(hood);
-    // Hood back
-    const hoodBackGeo=new THREE.SphereGeometry(0.28,12,8,0,Math.PI*2,0,Math.PI/2);
-    const hoodBack=new THREE.Mesh(hoodBackGeo,darkMat);
-    hoodBack.position.set(0,bodyH/2+0.1,-0.1);hoodBack.rotation.x=0.3;
-    group.add(hoodBack);
+  // Hood or collar
+  const hood=document.getElementById('hood');
+  const hoodF=document.getElementById('hood-f');
+  const hoodB=document.getElementById('hood-b');
+  if(isHoodie){
+    hood.style.display='block';
+    hoodF.style.background=dark;
+    hoodB.style.background=darker;
+  } else if(isTshirt){
+    hood.style.display='none';
   } else {
-    // Regular collar
-    const collarGeo=new THREE.TorusGeometry(0.18,0.04,8,20,Math.PI*1.5);
-    const collar=new THREE.Mesh(collarGeo,darkMat);
-    collar.position.set(0,bodyH/2+0.02,0);collar.rotation.x=-Math.PI/2;collar.rotation.z=Math.PI/4;
-    group.add(collar);
+    hood.style.display='block';
+    hoodF.style.background=darker;
+    hoodB.style.background=darker;
+    // Make smaller for jacket/coat collar
+    hood.style.width='80px';
+    hood.style.left='70px';
+    hood.style.height='30px';
+    hood.style.top='-20px';
   }
 
-  // ── BOTTOM HEM ──
-  const hemGeo=new THREE.BoxGeometry(bodyW+0.02,0.04,bodyD+0.02);
-  const hem=new THREE.Mesh(hemGeo,darkMat);
-  hem.position.set(0,-bodyH/2-0.02,0);
-  group.add(hem);
+  // Sleeve length based on type
+  const sleeveH=isTshirt?'80px':'160px';
+  document.getElementById('sleeve-l').style.height=sleeveH;
+  document.getElementById('sleeve-r').style.height=sleeveH;
+  ['sl-lf','sl-lb','sl-ll','sl-lr'].forEach(id=>{document.getElementById(id).style.height=sleeveH});
+  ['sl-rf','sl-rb','sl-rl','sl-rr'].forEach(id=>{document.getElementById(id).style.height=sleeveH});
 
-  // ── CUFFS ──
-  const cuffGeo=new THREE.BoxGeometry(0.02,sleeveW+0.02,sleeveD+0.02);
-  const lCuff=new THREE.Mesh(cuffGeo,darkMat);
-  lCuff.position.set(-(bodyW/2+sleeveLen)-0.01,bodyH/2-sleeveW/2-0.02,-sleeveD/2);
-  group.add(lCuff);
-  const rCuff=lCuff.clone();
-  rCuff.position.set(bodyW/2+sleeveLen+0.01,bodyH/2-sleeveW/2-0.02,-sleeveD/2);
-  group.add(rCuff);
-
-  // Centre everything vertically
-  group.position.y=-(bodyH/2);
-}
-
-// Gentle floating animation
-let floatRaf=null,floatT=0;
-function floatAnim(){
-  cancelAnimationFrame(floatRaf);
-  const step=()=>{
-    floatT+=0.016;
-    if(clothGroup)clothGroup.position.y=Math.sin(floatT*0.8)*0.04-0.1;
-    floatRaf=requestAnimationFrame(step);
-  };
-  floatRaf=requestAnimationFrame(step);
-}
-
-// ── Orbit Controls ──
-function setupOrbit(canvas){
-  canvas.addEventListener('mousedown',e=>{orb.drag=true;orb.lx=e.clientX;orb.ly=e.clientY;orb.vt=0;orb.vp=0;e.preventDefault()});
-  canvas.addEventListener('touchstart',e=>{
-    if(e.touches.length===1){orb.drag=true;orb.lx=e.touches[0].clientX;orb.ly=e.touches[0].clientY;orb.vt=0;orb.vp=0}
-    if(e.touches.length===2){orb.pinch=true;orb.pd=pinchD(e)}
-  },{passive:true});
-  window.addEventListener('mousemove',e=>{
-    if(!orb.drag)return;
-    const dx=e.clientX-orb.lx,dy=e.clientY-orb.ly;
-    orb.vt=dx*0.006;orb.vp=dy*0.006;
-    orb.theta-=dx*0.01;orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi-dy*0.008));
-    orb.lx=e.clientX;orb.ly=e.clientY;
-    updateCam();updDeg();
+  // Body height for coat
+  const bodyH=isCoat?'340px':'280px';
+  ['front-panel','back-panel','left-panel','right-panel'].forEach(id=>{
+    document.getElementById(id).style.height=bodyH;
   });
-  window.addEventListener('touchmove',e=>{
-    if(orb.drag&&e.touches.length===1){
-      const dx=e.touches[0].clientX-orb.lx,dy=e.touches[0].clientY-orb.ly;
-      orb.vt=dx*0.006;orb.vp=dy*0.006;
-      orb.theta-=dx*0.01;orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi-dy*0.008));
-      orb.lx=e.touches[0].clientX;orb.ly=e.touches[0].clientY;
-      updateCam();updDeg();
-    }
-    if(orb.pinch&&e.touches.length===2){
-      const d=pinchD(e);orb.r=Math.max(1.2,Math.min(7,orb.r*orb.pd/d));orb.pd=d;updateCam();
-    }
-  },{passive:true});
-  window.addEventListener('mouseup',()=>{if(orb.drag){orb.drag=false;momentum()}});
-  window.addEventListener('touchend',()=>{orb.drag=false;orb.pinch=false;momentum()});
-  canvas.addEventListener('wheel',e=>{e.preventDefault();orb.r=Math.max(1.2,Math.min(7,orb.r+e.deltaY*0.005));updateCam()},{passive:false});
-}
-function pinchD(e){return Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)}
-let momRaf=null;
-function momentum(){
-  cancelAnimationFrame(momRaf);
-  const go=()=>{
-    orb.vt*=0.92;orb.vp*=0.92;
-    if(Math.abs(orb.vt)<0.0003&&Math.abs(orb.vp)<0.0003)return;
-    orb.theta-=orb.vt*12;orb.phi=Math.max(0.1,Math.min(Math.PI-0.1,orb.phi-orb.vp*12));
-    updateCam();updDeg();momRaf=requestAnimationFrame(go);
-  };momRaf=requestAnimationFrame(go);
-}
-function updateCam(){
-  if(!camera)return;
-  const x=TARGET.x+orb.r*Math.sin(orb.phi)*Math.sin(orb.theta);
-  const y=TARGET.y+orb.r*Math.cos(orb.phi);
-  const z=TARGET.z+orb.r*Math.sin(orb.phi)*Math.cos(orb.theta);
-  camera.position.set(x,y,z);camera.lookAt(TARGET);
-}
-function updDeg(){const d=((orb.theta*180/Math.PI)%360+360)%360;document.getElementById('v3deg').textContent=Math.round(d)+'°'}
-function reset3D(){orb.theta=0.4;orb.phi=1.3;orb.r=2.8;orb.vt=0;orb.vp=0;updateCam();updDeg()}
-function z3(f){orb.r=Math.max(1.2,Math.min(7,orb.r*f));updateCam()}
-function animate3D(){
-  animId=requestAnimationFrame(animate3D);
-  // Slow auto-rotate when idle
-  if(!orb.drag&&Math.abs(orb.vt)<0.001){orb.theta+=0.005;updateCam();updDeg()}
-  renderer.render(scene,camera);
+  document.getElementById('cloth3d').style.height=bodyH;
 }
 
-// ── View Switcher ──
+function darken(hex,factor){
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  if(isNaN(r)){r=30;g=30;b=30;}
+  r=Math.round(r*factor);g=Math.round(g*factor);b=Math.round(b*factor);
+  return `rgb(${r},${g},${b})`;
+}
+function setColor(id,color){
+  const el=document.getElementById(id);
+  if(el)el.style.background=color;
+}
+
+// ── CSS 3D Rotation — drag any direction ──
+function applyTransform(){
+  const el=document.getElementById('cloth3d');
+  floatT+=0.02;
+  const fy=Math.sin(floatT)*6;
+  el.style.transform=`rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${clothScale}) translateY(${fy}px)`;
+  const deg=((rotY%360)+360)%360;
+  document.getElementById('v3deg').textContent=Math.round(deg)+'°';
+}
+
+function startDrag(x,y){
+  dragging=true;lastX=x;lastY=y;velX=0;velY=0;autoRotate=false;cancelAnimationFrame(autoRaf);
+}
+function moveDrag(x,y){
+  if(!dragging)return;
+  const dx=x-lastX,dy=y-lastY;
+  velX=dx;velY=dy;
+  rotY+=dx*0.5;rotX-=dy*0.3;
+  rotX=Math.max(-60,Math.min(60,rotX));
+  lastX=x;lastY=y;
+  applyTransform();
+}
+function endDrag(){
+  dragging=false;
+  // momentum
+  const decay=()=>{
+    velX*=0.92;velY*=0.92;
+    rotY+=velX*0.3;rotX-=velY*0.2;
+    rotX=Math.max(-60,Math.min(60,rotX));
+    applyTransform();
+    if(Math.abs(velX)>0.1||Math.abs(velY)>0.1)requestAnimationFrame(decay);
+    else startAutoSpin();
+  };
+  requestAnimationFrame(decay);
+}
+
+function startAutoSpin(){
+  cancelAnimationFrame(autoRaf);
+  autoRotate=true;
+  const spin=()=>{
+    if(!autoRotate)return;
+    rotY+=0.4;
+    applyTransform();
+    autoRaf=requestAnimationFrame(spin);
+  };
+  autoRaf=requestAnimationFrame(spin);
+}
+
+function reset3D(){rotX=-15;rotY=20;clothScale=1;velX=0;velY=0;applyTransform();}
+function zoomCloth(f){clothScale=Math.max(0.5,Math.min(1.8,clothScale*f));applyTransform();}
+
+function init360(){
+  const el=document.getElementById('viewer3d');
+  el.addEventListener('mousedown',e=>{startDrag(e.clientX,e.clientY);e.preventDefault()});
+  el.addEventListener('touchstart',e=>{
+    if(e.touches.length===1)startDrag(e.touches[0].clientX,e.touches[0].clientY);
+    if(e.touches.length===2){pinching=true;pinchDist=getPD(e);}
+  },{passive:true});
+  window.addEventListener('mousemove',e=>{if(dragging)moveDrag(e.clientX,e.clientY)});
+  window.addEventListener('touchmove',e=>{
+    if(dragging&&e.touches.length===1)moveDrag(e.touches[0].clientX,e.touches[0].clientY);
+    if(pinching&&e.touches.length===2){
+      const d=getPD(e);clothScale=Math.max(0.5,Math.min(1.8,clothScale*d/pinchDist));pinchDist=d;applyTransform();
+    }
+  },{passive:true});
+  window.addEventListener('mouseup',()=>{if(dragging)endDrag()});
+  window.addEventListener('touchend',()=>{dragging=false;pinching=false;endDrag()});
+  el.addEventListener('wheel',e=>{e.preventDefault();zoomCloth(e.deltaY>0?0.93:1.07)},{passive:false});
+  // Start floating + spinning
+  update3DCloth();
+  startAutoSpin();
+  setTimeout(()=>document.getElementById('v3hint').classList.add('gone'),4000);
+}
+
+function getPD(e){return Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)}
+
 function setV(v){
   document.getElementById('swiper').style.display=v==='photos'?'flex':'none';
-  document.getElementById('viewer3d').classList.toggle('show',v==='360');
+  const v3=document.getElementById('viewer3d');
+  const show=v==='360';
+  v3.classList.toggle('show',show);
   document.getElementById('mdots').style.display=v==='photos'?'flex':'none';
   document.getElementById('tph').classList.toggle('on',v==='photos');
   document.getElementById('t360').classList.toggle('on',v==='360');
-  if(v==='360'){setTimeout(()=>{init3D();updateCam();},50);}
-  else{if(animId){cancelAnimationFrame(animId);animId=null;}cancelAnimationFrame(floatRaf);}
+  if(show){
+    init360();
+  } else {
+    cancelAnimationFrame(autoRaf);
+    autoRotate=false;
+  }
 }
+
 function pickSz(el){document.querySelectorAll('.sbtn:not(.oos)').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
 let wished=false;
 function toggleWish(){
@@ -689,14 +605,10 @@ function startARCam(){
       const v=document.getElementById('arv');v.srcObject=stream;
       v.onloadedmetadata=()=>{
         setARStat('Stand back — show full body');
-        setTimeout(()=>{
-          scanDone=true;
-          document.getElementById('scanline').classList.add('done');
-          ['ctl','ctr','cbl','cbr'].forEach(id=>document.getElementById(id).classList.add('go'));
-        },2600);
+        setTimeout(()=>{scanDone=true;document.getElementById('scanline').classList.add('done');['ctl','ctr','cbl','cbr'].forEach(id=>document.getElementById(id).classList.add('go'));},2600);
         startARPose(v);
       };
-    }).catch(()=>setARStat('Camera denied — allow in browser settings','err'));
+    }).catch(()=>setARStat('Camera denied — allow in settings','err'));
 }
 function flipCam(){facing=facing==='user'?'environment':'user';closeAR();setTimeout(openAR,400)}
 function startARPose(video){
@@ -712,7 +624,7 @@ function startARPose(video){
     ctx.drawImage(res.image,0,0,canvas.width,canvas.height);
     if(res.poseLandmarks&&res.poseLandmarks.length>0&&scanDone){
       document.getElementById('bguide').classList.add('gone');
-      drawClothingAR(ctx,canvas.width,canvas.height,res.poseLandmarks);
+      drawClothAR(ctx,canvas.width,canvas.height,res.poseLandmarks);
       setARStat('✓ '+SEL.name,'ok');
     } else if(scanDone){
       document.getElementById('bguide').classList.remove('gone');
@@ -723,7 +635,7 @@ function startARPose(video){
   mpCam=new Camera(video,{onFrame:async()=>{if(mpCam)await pose.send({image:video});},width:1280,height:720});
   mpCam.start();
 }
-function drawClothingAR(ctx,w,h,lm){
+function drawClothAR(ctx,w,h,lm){
   const lS=lm[11],rS=lm[12],lH=lm[23],rH=lm[24];
   if(!lS||!rS||!lH||!rH)return;
   const opacity=document.getElementById('aropa').value/100;
