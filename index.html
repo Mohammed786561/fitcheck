@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitCheck — AI Virtual Try-On</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f9f9f7; color: #1a1a1a; }
+  nav { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .nav-logo span { color: #1a5fb4; }
+  .nav-badge { background: #e8f0fe; color: #1a5fb4; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
+  .hero { background: #fff; padding: 2.5rem 2rem 2rem; text-align: center; border-bottom: 1px solid #e8e8e4; }
+  .hero h1 { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
+  .hero h1 span { color: #1a5fb4; }
+  .hero p { font-size: 15px; color: #666; max-width: 460px; margin: 0 auto; line-height: 1.6; }
+  .main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+  .cam-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #111; border-radius: 16px; overflow: hidden; }
+  #video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+  #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #111; padding: 2rem; text-align: center; }
+  .cam-overlay p { font-size: 14px; color: #aaa; line-height: 1.6; }
+  .cam-overlay h3 { font-size: 18px; color: #fff; font-weight: 600; }
+  .start-btn { background: #1a5fb4; color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; }
+  .start-btn:hover { background: #1450a0; }
+  .ai-badge { position: absolute; top: 12px; left: 12px; background: rgba(26,95,180,0.9); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
+  .pose-badge { position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: none; }
+  .pose-badge.detected { background: rgba(30,126,52,0.9); color: #fff; display: block; }
+  .pose-badge.searching { background: rgba(180,120,0,0.9); color: #fff; display: block; }
+  .sidebar { display: flex; flex-direction: column; gap: 14px; }
+  .panel { background: #fff; border: 1px solid #e8e8e4; border-radius: 12px; padding: 1rem 1.1rem; }
+  .panel-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 10px; }
+  .clothes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .cloth-btn { border: 1.5px solid #e8e8e4; border-radius: 10px; padding: 10px 6px; text-align: center; cursor: pointer; background: #fff; transition: all 0.15s; }
+  .cloth-btn:hover { border-color: #aaa; }
+  .cloth-btn.active { border-color: #1a5fb4; background: #f0f5ff; }
+  .cloth-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+  .cloth-name { font-size: 12px; font-weight: 500; color: #333; }
+  .cloth-price { font-size: 11px; color: #888; }
+  .status-box { background: #f5f5f3; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #555; line-height: 1.5; text-align: center; }
+  .status-box.live { background: #e8f0fe; color: #1a5fb4; }
+  .status-box.detected { background: #e6f4ea; color: #1e7e34; }
+  .size-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .size-btn { border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; background: #fff; }
+  .size-btn.active, .size-btn:hover { border-color: #1a5fb4; color: #1a5fb4; font-weight: 500; }
+  .buy-btn { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .buy-btn:hover { background: #333; }
+  .how { background: #1a1a1a; color: #fff; padding: 2.5rem 2rem; text-align: center; margin-top: 2rem; }
+  .how h2 { font-size: 22px; font-weight: 600; margin-bottom: 0.4rem; }
+  .how-sub { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+  .how-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 700px; margin: 0 auto; }
+  .how-step-num { width: 32px; height: 32px; border-radius: 50%; background: #1a5fb4; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin: 0 auto 8px; }
+  .how-step-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .how-step-desc { font-size: 12px; color: #888; line-height: 1.4; }
+  footer { background: #fff; border-top: 1px solid #e8e8e4; padding: 1.25rem 2rem; text-align: center; font-size: 13px; color: #888; }
+  footer span { color: #1a5fb4; font-weight: 500; }
+  @media(max-width:680px) {
+    .main { grid-template-columns: 1fr; }
+    .how-steps { grid-template-columns: repeat(2,1fr); }
+    .hero h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Fit<span>Check</span></div>
+  <div class="nav-badge">AI Powered</div>
+</nav>
+
+<div class="hero">
+  <h1>Virtual try-on <span>powered by AI</span></h1>
+  <p>Select a clothing item, start your camera, and our AI tracks your body to show you exactly how it looks on you — in real time.</p>
+</div>
+
+<div class="main">
+  <div style="position:relative;">
+    <div class="cam-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+      <div class="cam-overlay" id="overlay">
+        <h3>AI Body Tracking</h3>
+        <p>Our AI uses Google MediaPipe to detect your body shape and overlay clothing on you in real time — just like Lenskart, but for clothes.</p>
+        <button class="start-btn" onclick="startCamera()">Start Camera</button>
+      </div>
+      <div class="ai-badge" id="ai-badge">FitCheck AI</div>
+      <div class="pose-badge" id="pose-badge">Searching...</div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="panel">
+      <div class="panel-label">Choose item to try</div>
+      <div class="clothes-grid">
+        <div class="cloth-btn active" id="btn-hoodie" onclick="selectCloth('hoodie',this)">
+          <span class="cloth-icon">🧥</span>
+          <div class="cloth-name">Hoodie</div>
+          <div class="cloth-price">$59</div>
+        </div>
+        <div class="cloth-btn" id="btn-tshirt" onclick="selectCloth('tshirt',this)">
+          <span class="cloth-icon">👕</span>
+          <div class="cloth-name">T-Shirt</div>
+          <div class="cloth-price">$29</div>
+        </div>
+        <div class="cloth-btn" id="btn-jacket" onclick="selectCloth('jacket',this)">
+          <span class="cloth-icon">🧣</span>
+          <div class="cloth-name">Jacket</div>
+          <div class="cloth-price">$89</div>
+        </div>
+        <div class="cloth-btn" id="btn-vest" onclick="selectCloth('vest',this)">
+          <span class="cloth-icon">🥼</span>
+          <div class="cloth-name">Vest</div>
+          <div class="cloth-price">$49</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Size</div>
+      <div class="size-row">
+        <div class="size-btn" onclick="pickSize(this)">XS</div>
+        <div class="size-btn active" onclick="pickSize(this)">S</div>
+        <div class="size-btn" onclick="pickSize(this)">M</div>
+        <div class="size-btn" onclick="pickSize(this)">L</div>
+        <div class="size-btn" onclick="pickSize(this)">XL</div>
+      </div>
+    </div>
+
+    <div class="status-box" id="status">Select an item and start camera</div>
+
+    <div class="panel">
+      <div class="panel-label">AI Status</div>
+      <div style="font-size:13px;color:#555;line-height:1.6;" id="ai-status">
+        Waiting for camera — MediaPipe body tracking will activate once camera starts.
+      </div>
+    </div>
+
+    <button class="buy-btn" onclick="alert('Added to cart! In a real integration this connects to the brand store.')">Add to Cart</button>
+  </div>
+</div>
+
+<div class="how">
+  <h2>How it works</h2>
+  <div class="how-sub">Powered by Google MediaPipe AI — just a regular phone camera</div>
+  <div class="how-steps">
+    <div>
+      <div class="how-step-num">1</div>
+      <div class="how-step-title">Pick clothing</div>
+      <div class="how-step-desc">Choose any item from the store</div>
+    </div>
+    <div>
+      <div class="how-step-num">2</div>
+      <div class="how-step-title">AI detects you</div>
+      <div class="how-step-desc">MediaPipe finds your shoulders and torso</div>
+    </div>
+    <div>
+      <div class="how-step-num">3</div>
+      <div class="how-step-title">Clothes fit you</div>
+      <div class="how-step-desc">Garment scales and positions to your body</div>
+    </div>
+    <div>
+      <div class="how-step-num">4</div>
+      <div class="how-step-title">Buy confident</div>
+      <div class="how-step-desc">Know it fits — fewer returns</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>FitCheck</span> — AI virtual try-on prototype &nbsp;&bull;&nbsp; Built for clothing brands &nbsp;&bull;&nbsp; Powered by Google MediaPipe
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script>
+let currentCloth = 'hoodie';
+let poseDetected = false;
+let landmarks = null;
+let mpCamera = null;
+
+const clothColors = {
+  hoodie:  { main:'#4A90D9', dark:'#2a6aB9', label:'Classic Hoodie — $59' },
+  tshirt:  { main:'#E07B5A', dark:'#c05a3a', label:'Essential Tee — $29' },
+  jacket:  { main:'#4A6A4A', dark:'#2a4a2a', label:'Urban Jacket — $89' },
+  vest:    { main:'#8B6AB5', dark:'#6b4a95', label:'Puffer Vest — $49' }
+};
+
+function selectCloth(name, el) {
+  currentCloth = name;
+  document.querySelectorAll('.cloth-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  setStatus(clothColors[name].label + ' selected', 'live');
+}
+
+function pickSize(el) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setStatus(msg, type) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = 'status-box ' + (type || '');
+}
+
+function startCamera() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('ai-badge').style.display = 'block';
+  document.getElementById('pose-badge').className = 'pose-badge searching';
+  document.getElementById('pose-badge').textContent = 'Searching for body...';
+  setStatus('Camera starting — stand back so your full torso is visible', 'live');
+  document.getElementById('ai-status').textContent = 'MediaPipe loading... Stand 1-2 metres from camera with your full torso visible.';
+
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+
+  const pose = new Pose({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
+  pose.setOptions({ modelComplexity: 1, smoothLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+
+  pose.onResults(results => {
+    canvas.width = video.videoWidth || canvas.offsetWidth;
+    canvas.height = video.videoHeight || canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+    if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+      landmarks = results.poseLandmarks;
+      poseDetected = true;
+      document.getElementById('pose-badge').className = 'pose-badge detected';
+      document.getElementById('pose-badge').textContent = 'Body detected';
+      document.getElementById('ai-status').textContent = 'Body detected! AI is tracking your shoulders and torso in real time.';
+      setStatus('Body detected — ' + clothColors[currentCloth].label, 'detected');
+      drawClothing(ctx, canvas.width, canvas.height, landmarks);
+    } else {
+      poseDetected = false;
+      document.getElementById('pose-badge').className = 'pose-badge searching';
+      document.getElementById('pose-badge').textContent = 'Searching...';
+      document.getElementById('ai-status').textContent = 'Stand back so your full upper body is visible to the camera.';
+    }
+    ctx.restore();
+  });
+
+  mpCamera = new Camera(video, {
+    onFrame: async () => { await pose.send({ image: video }); },
+    width: 640, height: 480
+  });
+  mpCamera.start();
+}
+
+function drawClothing(ctx, w, h, lm) {
+  const c = clothColors[currentCloth];
+
+  // Get key landmarks (mirrored because we flip canvas)
+  const lShoulder = lm[11];
+  const rShoulder = lm[12];
+  const lHip = lm[23];
+  const rHip = lm[24];
+
+  if (!lShoulder || !rShoulder || !lHip || !rHip) return;
+
+  // Convert normalised coords to pixels (mirrored)
+  const lsx = (1 - lShoulder.x) * w, lsy = lShoulder.y * h;
+  const rsx = (1 - rShoulder.x) * w, rsy = rShoulder.y * h;
+  const lhx = (1 - lHip.x) * w,     lhy = lHip.y * h;
+  const rhx = (1 - rHip.x) * w,     rhy = rHip.y * h;
+
+  const shoulderW = Math.abs(rsx - lsx);
+  const torsoH = ((lhy + rhy) / 2) - ((lsy + rsy) / 2);
+  const cx = (lsx + rsx) / 2;
+  const cy = (lsy + rsy) / 2;
+
+  const pw = shoulderW * 1.55;
+  const ph = torsoH * 1.15;
+  const px = cx - pw / 2;
+  const py = cy - ph * 0.08;
+
+  ctx.globalAlpha = 0.82;
+
+  if (currentCloth === 'hoodie') {
+    drawHoodie(ctx, px, py, pw, ph, c.main, c.dark, lsx, lsy, rsx, rsy);
+  } else if (currentCloth === 'tshirt') {
+    drawTshirt(ctx, px, py, pw, ph, c.main, c.dark, lsx, lsy, rsx, rsy);
+  } else if (currentCloth === 'jacket') {
+    drawJacket(ctx, px, py, pw, ph, c.main, c.dark, lsx, lsy, rsx, rsy);
+  } else if (currentCloth === 'vest') {
+    drawVest(ctx, px, py, pw, ph, c.main, c.dark);
+  }
+
+  ctx.globalAlpha = 1;
+}
+
+function drawHoodie(ctx, x, y, w, h, main, dark, lsx, lsy, rsx, rsy) {
+  const sleeveW = w * 0.22;
+  const sleeveH = h * 0.65;
+  // Left sleeve
+  ctx.fillStyle = main;
+  ctx.beginPath();
+  ctx.moveTo(x, y + h * 0.1);
+  ctx.lineTo(x - sleeveW, lsy + sleeveH);
+  ctx.lineTo(x - sleeveW * 0.3, lsy + sleeveH);
+  ctx.lineTo(x + w * 0.12, y + h * 0.25);
+  ctx.closePath(); ctx.fill();
+  // Right sleeve
+  ctx.beginPath();
+  ctx.moveTo(x + w, y + h * 0.1);
+  ctx.lineTo(x + w + sleeveW, rsy + sleeveH);
+  ctx.lineTo(x + w + sleeveW * 0.3, rsy + sleeveH);
+  ctx.lineTo(x + w * 0.88, y + h * 0.25);
+  ctx.closePath(); ctx.fill();
+  // Body
+  ctx.fillStyle = main;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.08, y);
+  ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.05, x + w * 0.92, y);
+  ctx.lineTo(x + w, y + h * 0.1);
+  ctx.lineTo(x + w * 0.88, y + h * 0.25);
+  ctx.lineTo(x + w * 0.85, y + h);
+  ctx.lineTo(x + w * 0.15, y + h);
+  ctx.lineTo(x + w * 0.12, y + h * 0.25);
+  ctx.lineTo(x, y + h * 0.1);
+  ctx.closePath(); ctx.fill();
+  // Hood
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.arc(x + w * 0.5, y + h * 0.01, w * 0.14, 0, Math.PI * 2);
+  ctx.fill();
+  // Pocket line
+  ctx.strokeStyle = dark; ctx.lineWidth = 2; ctx.globalAlpha = 0.4;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.25, y + h * 0.7);
+  ctx.lineTo(x + w * 0.75, y + h * 0.7);
+  ctx.stroke(); ctx.globalAlpha = 0.82;
+}
+
+function drawTshirt(ctx, x, y, w, h, main, dark, lsx, lsy, rsx, rsy) {
+  const sleeveW = w * 0.18;
+  const sleeveH = h * 0.3;
+  ctx.fillStyle = main;
+  // Left sleeve
+  ctx.beginPath();
+  ctx.moveTo(x, y + h * 0.08);
+  ctx.lineTo(x - sleeveW, y + sleeveH);
+  ctx.lineTo(x - sleeveW * 0.2, y + sleeveH + h * 0.05);
+  ctx.lineTo(x + w * 0.12, y + h * 0.22);
+  ctx.closePath(); ctx.fill();
+  // Right sleeve
+  ctx.beginPath();
+  ctx.moveTo(x + w, y + h * 0.08);
+  ctx.lineTo(x + w + sleeveW, y + sleeveH);
+  ctx.lineTo(x + w + sleeveW * 0.2, y + sleeveH + h * 0.05);
+  ctx.lineTo(x + w * 0.88, y + h * 0.22);
+  ctx.closePath(); ctx.fill();
+  // Body
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.1, y);
+  ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.04, x + w * 0.9, y);
+  ctx.lineTo(x + w, y + h * 0.08);
+  ctx.lineTo(x + w * 0.88, y + h * 0.22);
+  ctx.lineTo(x + w * 0.84, y + h);
+  ctx.lineTo(x + w * 0.16, y + h);
+  ctx.lineTo(x + w * 0.12, y + h * 0.22);
+  ctx.lineTo(x, y + h * 0.08);
+  ctx.closePath(); ctx.fill();
+  // Collar
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.ellipse(x + w * 0.5, y + h * 0.03, w * 0.12, h * 0.05, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawJacket(ctx, x, y, w, h, main, dark, lsx, lsy, rsx, rsy) {
+  const sleeveW = w * 0.23;
+  const sleeveH = h * 0.7;
+  ctx.fillStyle = main;
+  // Left sleeve
+  ctx.beginPath();
+  ctx.moveTo(x, y + h * 0.1);
+  ctx.lineTo(x - sleeveW, lsy + sleeveH);
+  ctx.lineTo(x - sleeveW * 0.3, lsy + sleeveH + h * 0.03);
+  ctx.lineTo(x + w * 0.1, y + h * 0.28);
+  ctx.closePath(); ctx.fill();
+  // Right sleeve
+  ctx.beginPath();
+  ctx.moveTo(x + w, y + h * 0.1);
+  ctx.lineTo(x + w + sleeveW, rsy + sleeveH);
+  ctx.lineTo(x + w + sleeveW * 0.3, rsy + sleeveH + h * 0.03);
+  ctx.lineTo(x + w * 0.9, y + h * 0.28);
+  ctx.closePath(); ctx.fill();
+  // Body
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.07, y - h * 0.02);
+  ctx.lineTo(x + w * 0.93, y - h * 0.02);
+  ctx.lineTo(x + w, y + h * 0.1);
+  ctx.lineTo(x + w * 0.9, y + h * 0.28);
+  ctx.lineTo(x + w * 0.86, y + h * 1.02);
+  ctx.lineTo(x + w * 0.14, y + h * 1.02);
+  ctx.lineTo(x + w * 0.1, y + h * 0.28);
+  ctx.lineTo(x, y + h * 0.1);
+  ctx.closePath(); ctx.fill();
+  // Zip line
+  ctx.strokeStyle = dark; ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.5, y); ctx.lineTo(x + w * 0.5, y + h); ctx.stroke();
+  // Collar
+  ctx.fillStyle = dark; ctx.globalAlpha = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.35, y - h * 0.02);
+  ctx.lineTo(x + w * 0.5, y + h * 0.12);
+  ctx.lineTo(x + w * 0.65, y - h * 0.02);
+  ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 0.82;
+}
+
+function drawVest(ctx, x, y, w, h, main, dark) {
+  ctx.fillStyle = main;
+  // Body no sleeves
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.18, y);
+  ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.04, x + w * 0.82, y);
+  ctx.lineTo(x + w * 0.88, y + h * 0.15);
+  ctx.lineTo(x + w * 0.84, y + h);
+  ctx.lineTo(x + w * 0.16, y + h);
+  ctx.lineTo(x + w * 0.12, y + h * 0.15);
+  ctx.closePath(); ctx.fill();
+  // Collar
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.35, y);
+  ctx.lineTo(x + w * 0.5, y + h * 0.14);
+  ctx.lineTo(x + w * 0.65, y);
+  ctx.closePath(); ctx.fill();
+  // Zip
+  ctx.strokeStyle = dark; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.5, y + h * 0.05);
+  ctx.lineTo(x + w * 0.5, y + h);
+  ctx.stroke(); ctx.globalAlpha = 0.82;
+}
+</script>
+</body>
+</html>
